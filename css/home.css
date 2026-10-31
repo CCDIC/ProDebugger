@@ -169,31 +169,27 @@ body.page-home .app { padding: 0; }
 .paper-link:hover { background: var(--h-ink-2); transform: translateY(-1px); }
 .paper-link.is-soon { background: var(--h-bg-2); color: var(--h-muted); border: 1px dashed var(--h-line-2); cursor: default; transform: none; }
 .paper-link small { font-family: var(--mono); font-size: .68rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
-.video-wrap { max-width: 68rem; }
-.video-tabs { display: inline-flex; gap: .25rem; margin-bottom: .9rem; padding: .25rem; border: 1px solid var(--h-line); border-radius: .6rem; background: var(--h-card); }
+.video-tabs { display: inline-flex; gap: .25rem; margin-right: auto; padding: .25rem; border: 1px solid var(--h-line); border-radius: .6rem; background: var(--h-card); }
 .video-tabs button { padding: .4rem .9rem; border: 0; border-radius: .4rem; background: none; color: var(--h-muted); font: inherit; font-weight: 500; cursor: pointer; }
 .video-tabs button[aria-selected="true"] { background: var(--h-ink); color: #fff; }
 .video-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--h-line); border-radius: 1rem; background: var(--h-ink); box-shadow: var(--h-shadow); }
 .video-frame > iframe, .video-frame > video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .video-frame:has(> video) { aspect-ratio: auto; }  /* a shipped file keeps its own shape */
 .video-frame > video { position: static; display: block; height: auto; max-height: calc(100svh - 10rem); margin-inline: auto; }
-.video-soon img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .35; filter: blur(2px); }
-.video-soon span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: .6rem; color: #fff; font-size: 1.15rem; font-weight: 600; }
-.video-soon .h-icon { width: 1.6rem; height: 1.6rem; }
+/* Video dialog: opened from the Video buttons, dark like the player it frames. */
+.video-dialog { width: min(94vw, 76rem); max-height: 94svh; padding: 0; border: 0; border-radius: 1rem; background: var(--h-ink); color: #fff; box-shadow: 0 30px 80px #0008; overflow: hidden; }
+.video-dialog::backdrop { background: #12161bcc; backdrop-filter: blur(4px); }
+.video-dialog-bar { display: flex; align-items: center; gap: 1rem; padding: .7rem .8rem .7rem 1.3rem; border-bottom: 1px solid #ffffff1f; font-size: .95rem; }
+.video-dialog-bar strong { margin-right: auto; font-weight: 600; }
+.video-dialog-bar .video-tabs { margin-right: 0; }
+.video-dialog .video-frame { border: 0; border-radius: 0; box-shadow: none; }
+.video-dialog .video-frame > video { max-height: calc(94svh - 3.6rem); }
 .section-title { margin: .6rem 0 .8rem; font-size: clamp(2.1rem, 3.8vw, 3.1rem); line-height: 1.12; font-weight: 600; letter-spacing: -.025em; }
 .section-lede { margin: 0; font-size: 1.22rem; line-height: 1.6; color: var(--h-ink-2); }
 /* Card copy; scoped so the embedded workbench views keep their own type. */
-:is(.pain, .cap-card, .stage, .case-card) h3 { margin: 0 0 .45rem; font-size: 1.2rem; font-weight: 600; letter-spacing: -.005em; }
-:is(.pain, .cap-card, .stage, .case-card) p { margin: 0; color: var(--h-muted); font-size: 1.05rem; line-height: 1.6; }
+:is(.stage, .case-card) h3 { margin: 0 0 .45rem; font-size: 1.2rem; font-weight: 600; letter-spacing: -.005em; }
+:is(.stage, .case-card) p { margin: 0; color: var(--h-muted); font-size: 1.05rem; line-height: 1.6; }
 
-.pain-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--h-line); }
-.pain { padding-left: 1.1rem; border-left: 2px solid #e7a49e; }
-.solution-title { display: grid; gap: .6rem; margin: 2.5rem 0 1.5rem !important; font-size: clamp(1.6rem, 2.7vw, 2.1rem) !important; letter-spacing: -.02em !important; }
-.cap-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
-.cap-card { padding: 1.6rem; border: 1px solid var(--h-line); border-radius: 1rem; background: var(--h-card); box-shadow: var(--h-shadow); transition: transform .2s, border-color .2s; }
-.cap-card:hover { transform: translateY(-3px); border-color: var(--h-accent); }
-.cap-icon { display: grid; place-items: center; width: 2.9rem; height: 2.9rem; margin-bottom: 1rem; border-radius: .7rem; background: var(--h-accent-soft); color: var(--h-accent-ink); }
-.cap-icon .h-icon { width: 1.35rem; height: 1.35rem; stroke-width: 1.8; }
 
 /* How it works */
 .home { --h-map: #3f6fa8; --h-route: #7a5bb0; --h-trace: #c0623a; --h-submit: #3f8a55; }
@@ -248,7 +244,6 @@ body.page-home .app { padding: 0; }
 /* Scroll reveal: soft fade and rise, staggered within a group by --i. */
 .home [data-reveal] { opacity: 0; transform: translateY(20px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--i, 0) * 80ms); }
 .home [data-reveal].is-in { opacity: 1; transform: none; }
-.home .cap-card[data-reveal].is-in:hover { transform: translateY(-3px); transition-delay: 0s; }
 @media (prefers-reduced-motion: reduce) { .home [data-reveal] { opacity: 1; transform: none; transition: none; } }
 
 /* Footer */
@@ -259,7 +254,7 @@ body.page-home .app { padding: 0; }
 .home-note { margin-left: auto; font-family: var(--mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; padding: .25rem .6rem; border: 1px solid var(--h-line-2); border-radius: 2rem; }
 
 @media (max-width: 1080px) {
-  .cap-grid, .stage-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stage-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stage:nth-child(2)::after { display: none; }
 }
 @media (max-width: 900px) {
@@ -267,7 +262,6 @@ body.page-home .app { padding: 0; }
   .home-hero { min-height: 0; }
   .hero-visual .shot-stage { height: auto; aspect-ratio: 1072 / 560; }
   .hero-scroll { display: none; }
-  .pain-row { grid-template-columns: 1fr; gap: 1.25rem; }
   .demo-bar { flex-wrap: wrap; row-gap: .4rem; }
   .demo-dots, .demo-caption { display: none; }
   .demo-open { margin-left: auto; }

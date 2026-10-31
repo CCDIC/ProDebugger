@@ -14,23 +14,6 @@ export const DEMO_REF = ["runs", "dsl-route-causal-timeline-high-unlimited-alf18
 const icon = paths => `<svg class="h-icon" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
 const ARROW = icon('<path d="M5 12h14M13 6l6 6-6 6"/>');
 
-const PAINS = [
-  ["Hundreds of steps to read", "A single run mixes observations, memory, plans and actions; the decisive moment is buried."],
-  ["Symptoms show up late", "The failing step is rarely the faulty one. The real mistake happened several steps earlier."],
-  ["Verdicts without evidence", "A model saying “step 7 was wrong” is hard to trust when you cannot check why."],
-];
-
-const CAPABILITIES = [
-  ["Compare failure hypotheses", '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
-   "Investigates candidate steps, modules and fault types, with evidence that can support or challenge each hypothesis."],
-  ["Evidence you can verify", '<path d="M12 3 5 6v6c0 4.2 3 7.6 7 9 4-1.4 7-4.8 7-9V6z"/><path d="m9 12 2 2 4-4"/>',
-   "Inspect source quotations and compiled facts behind each candidate. SUBMIT selects an available candidate and records evidence limits in its uncertainty explanation."],
-  ["Watch it think, live", '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
-   "Follow each stage and every window review as the run writes it, or replay a finished diagnosis step by step."],
-  ["See the structure", '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="8" cy="18" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M8.3 7 15.6 7M7 8.4l.7 7.1M10.4 17.8l5.1-.6M17.9 9.5l.1 5"/>',
-   "Trajectories compile into fact, entity and goal graphs, shown side by side with the debugger's own decisions."],
-];
-
 const HERO_CAPABILITIES = [
   ["Structured Agent Logs", "Turn raw logs into linked facts, entities, and task requirements.", '<rect x="4" y="3" width="12" height="17" rx="2"/><path d="M8 7h4M8 11h4M16 15h4M18 13v4"/>'],
   ["Locate Suspected Errors", "Identify which step and agent component may be wrong.", '<path d="M3 4h18l-7 8v7l-4 2v-9z"/>'],
@@ -74,7 +57,7 @@ const STAGES = [
   ["submit", "SUBMIT", "Submit the verdict", "Compares TRACE candidates using supplied evidence and selects one existing candidate with an uncertainty explanation. If TRACE supplies no candidate, SUBMIT is skipped.", "Selected hypothesis"],
 ];
 
-// Project-site links (static export only): paper, code and a video section.
+// Project-site links (static export only): paper, code and a video that plays in a dialog.
 const LINK_ICONS = {
   paper: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
   code: '<path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"/>',
@@ -97,24 +80,20 @@ function projectLinks() {
     ? `<a class="paper-link" href="${esc(href)}"${external ? ' target="_blank" rel="noopener"' : ""}>${icon(LINK_ICONS[id])}${label}</a>`
     : `<span class="paper-link is-soon" aria-disabled="true">${icon(LINK_ICONS[id])}${label}<small>soon</small></span>`;
   return `<div class="paper-links">${link("paper", "Paper", PROJECT.paper)}${link("code", "Code", PROJECT.code)}${videoSources().length
-    ? `<button type="button" class="paper-link" data-scroll="video">${icon(LINK_ICONS.video)}Video</button>` : link("video", "Video", "")}</div>`;
+    ? `<button type="button" class="paper-link" data-open-video>${icon(LINK_ICONS.video)}Video</button>` : link("video", "Video", "")}</div>`;
 }
 
-function videoSection() {
+// The video stays folded behind the Video buttons and plays in a dialog over the page.
+function videoDialog() {
   const sources = videoSources();
-  const player = sources.length ? sources[0][2]
-    : `<div class="video-soon"><img src="./img/shots/chat.webp" alt="" loading="lazy"><span>${icon(LINK_ICONS.video)}Video coming soon</span></div>`;
-  return `<section class="home-section alt" id="video">
-    <div class="section-head" data-reveal>
-      <div class="h-eyebrow">Video</div>
-      <h2 class="section-title">ProDebugger in action.</h2>
-    </div>
-    <div class="video-wrap" data-reveal>
+  if (!sources.length) return "";
+  return `<dialog class="video-dialog" aria-label="ProDebugger video">
+    <div class="video-dialog-bar"><strong>ProDebugger in action</strong>
       ${sources.length > 1 ? `<div class="video-tabs" role="tablist" aria-label="Video source">${sources.map(([id, label], i) =>
         `<button type="button" role="tab" data-video="${id}" aria-selected="${i === 0}">${label}</button>`).join("")}</div>` : ""}
-      <div class="video-frame">${player}</div>
-    </div>
-  </section>`;
+      <button type="button" class="h-btn small" data-close-video>Close</button></div>
+    <div class="video-frame"></div>
+  </dialog>`;
 }
 
 // Hero screenshots of the workbench (web/capture_shots.py); each opens the live view.
@@ -238,8 +217,7 @@ export function mountHome(root) {
           <span class="home-mark" aria-hidden="true">[/]</span><span><strong>PRO</strong>DEBUGGER</span>
         </a>
         <nav class="home-nav" aria-label="Sections">
-          ${STATIC ? '<button type="button" data-scroll="video">Video</button>' : ""}
-          <button type="button" data-scroll="capabilities">Capabilities</button>
+          ${STATIC && videoSources().length ? '<button type="button" data-open-video>Video</button>' : ""}
           <button type="button" data-scroll="how">How it works</button>
           <button type="button" data-scroll="demo">Demo</button>
           <button type="button" data-scroll="next">What's next</button>
@@ -265,25 +243,7 @@ export function mountHome(root) {
           </div>
         </div>
         <div class="hero-visual" data-reveal><div class="hero-preview-label"><span>INSIDE AN INVESTIGATION</span><span class="hero-preview-status"><i></i> Interactive preview</span></div>${heroShots()}${openClawApplication()}</div>
-        <button type="button" class="hero-scroll" data-scroll="${STATIC ? "video" : "capabilities"}" aria-label="Scroll down">${icon('<path d="m6 9 6 6 6-6"/>')}</button>
-      </section>
-
-      ${STATIC ? videoSection() : ""}
-
-      <section class="home-section" id="capabilities">
-        <div class="section-head" data-reveal>
-          <div class="h-eyebrow">The problem</div>
-          <h2 class="section-title">Agent failures surface far from their cause.</h2>
-          <p class="section-lede">When an agent fails at the last step, the decision that doomed it usually happened much earlier. Finding it by hand is slow, and an unexplained verdict is hard to act on.</p>
-        </div>
-        <div class="pain-row" data-reveal-group>
-          ${PAINS.map(([title, text]) => `<div class="pain"><h3>${title}</h3><p>${text}</p></div>`).join("")}
-        </div>
-        <h3 class="solution-title" data-reveal><span class="h-eyebrow">The solution</span>ProDebugger turns a failed run into a verified diagnosis.</h3>
-        <div class="cap-grid" data-reveal-group>
-          ${CAPABILITIES.map(([title, paths, text]) => `<article class="cap-card">
-            <span class="cap-icon">${icon(paths)}</span><h3>${title}</h3><p>${text}</p></article>`).join("")}
-        </div>
+        <button type="button" class="hero-scroll" data-scroll="how" aria-label="Scroll down">${icon('<path d="m6 9 6 6 6-6"/>')}</button>
       </section>
 
       <section class="home-section alt" id="how">
@@ -372,6 +332,7 @@ export function mountHome(root) {
         ${STATIC ? '<span class="home-note">Recorded examples · no live model calls</span>' : '<span class="home-note">Internal preview</span>'}
       </footer>
 
+      ${STATIC ? videoDialog() : ""}
       <dialog class="diagram-dialog" aria-label="Technical diagram">
         <div class="diagram-bar"><strong>MAP → ROUTE → TRACE → SUBMIT · technical diagram</strong>
           <button type="button" class="h-btn small" data-close-diagram>Close</button></div>
@@ -381,20 +342,27 @@ export function mountHome(root) {
 
   rotateShots(root.querySelector(".hero-visual"));
   const dialog = root.querySelector(".diagram-dialog");
+  const videoBox = root.querySelector(".video-dialog");
+  const loadVideo = id => {
+    const sources = videoSources();
+    const [, , player] = sources.find(([key]) => key === id) || sources[0];
+    videoBox.querySelector(".video-frame").innerHTML = player;
+    videoBox.querySelectorAll("[data-video]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.video === (id || sources[0][0]))));
+    // The opening click allows playback with sound.
+    videoBox.querySelector("video")?.play().catch(() => {});
+  };
+  // Closing empties the frame so nothing keeps playing. Esc arrives as "cancel" and is
+  // handled the same way, synchronously (the async "close" event can be coalesced).
+  const closeVideo = () => { videoBox.close(); videoBox.querySelector(".video-frame").innerHTML = ""; };
+  videoBox?.addEventListener("cancel", event => { event.preventDefault(); closeVideo(); });
   const onClick = event => {
     const target = event.target.closest("[data-scroll]");
     if (target) root.querySelector("#" + target.dataset.scroll)?.scrollIntoView({behavior: "smooth", block: "start"});
-    // The hero's Video link plays the video it scrolls to (the click allows playback with sound).
-    if (target?.dataset.scroll === "video" && target.classList.contains("paper-link")) {
-      root.querySelector(".video-frame").scrollIntoView({behavior: "smooth", block: "center"});
-      root.querySelector(".video-frame video")?.play().catch(() => {});
-    }
+    if (videoBox && event.target.closest("[data-open-video]")) { videoBox.showModal(); loadVideo(); }
     if (event.target.closest("[data-open-diagram]")) dialog.showModal();
     const source = event.target.closest("[data-video]");
-    if (source) {
-      root.querySelectorAll("[data-video]").forEach(b => b.setAttribute("aria-selected", String(b === source)));
-      root.querySelector(".video-frame").innerHTML = videoSources().find(([id]) => id === source.dataset.video)[2];
-    }
+    if (source) loadVideo(source.dataset.video);
+    if (event.target.closest("[data-close-video]") || (videoBox && event.target === videoBox)) closeVideo();
     // A click on the backdrop lands on the dialog element itself.
     if (event.target.closest("[data-close-diagram]") || event.target === dialog) dialog.close();
   };
