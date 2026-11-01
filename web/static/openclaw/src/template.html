@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>ProDebugger · A privacy investigation</title>
+  <style>/*__STYLES__*/</style>
+</head>
+<body>
+  <a class="skip" href="#workspace" data-i18n="skip">Skip to investigation</a>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">[/]</span><span><strong>PRO</strong>DEBUGGER</span></div>
+    <span class="top-separator"></span><span class="top-context" data-i18n="caseStudy">CASE STUDY 01</span>
+    <span class="top-context muted" data-i18n="privacyReview">Privacy review</span>
+    <div class="top-actions"><span class="saved"><i></i><span data-i18n="savedReview">Saved review</span></span>
+      <a id="open-workbench" class="subtle-button workbench-link" href="http://127.0.0.1:8792/studio.html?risk=1" target="_blank" rel="noopener noreferrer" data-i18n="openWorkbench">Open workbench ↗</a>
+      <button id="language-toggle" class="subtle-button" aria-label="Switch interface language">EN <span class="muted">/ 中文</span></button>
+      <button id="theme-toggle" class="icon-button" aria-label="Toggle color theme">◐</button>
+    </div>
+  </header>
+  <main id="workspace">
+    <section class="case-header">
+      <div class="case-heading"><div class="eyebrow"><span class="micro-square"></span> OPENCLAW <span class="slash">/</span> <span data-i18n="privacyInvestigation">PRIVACY INVESTIGATION</span></div>
+        <h1 data-i18n="headline">Where did the ID number come from?</h1>
+        <p class="subtitle" data-i18n="subtitle">A résumé draft, two local files, and an identity field that should stay private.</p>
+        <div class="case-meta"><span class="badge neutral" data-i18n="constructedCase">Constructed case</span><span class="mono">ca30-d27b918e</span><button id="task-button" class="text-button" data-i18n="taskPolicy">Task & policy ↗</button></div>
+      </div>
+      <div class="case-stats" id="case-stats"></div>
+    </section>
+    <nav class="viewbar" aria-label="Case views"><div class="main-tabs" role="tablist">
+      <button class="main-tab active" id="tab-trajectory" data-view="trajectory" role="tab" aria-selected="true" aria-controls="view-trajectory" data-i18n="trajectory">Trajectory</button>
+      <button class="main-tab" id="tab-graph" data-view="graph" role="tab" aria-selected="false" aria-controls="view-graph" data-i18n="evidenceGraph">Evidence graph</button>
+      <button class="main-tab" id="tab-findings" data-view="findings" role="tab" aria-selected="false" aria-controls="view-findings"><span data-i18n="findings">Findings</span><span class="tab-count">2</span></button>
+    </div><div class="view-actions"><button id="export-button" class="subtle-button" data-i18n="exportEvidence">Export evidence ↓</button><button id="present-button" class="primary-button" aria-pressed="false"><span>▣</span><span data-i18n="present">Present</span></button></div></nav>
+    <nav class="chapter-nav" id="chapter-nav" aria-label="Walkthrough chapters"></nav>
+    <div class="workbench inspector-collapsed" id="workbench">
+      <div class="main-column">
+        <section id="view-trajectory" class="view" role="tabpanel" aria-labelledby="tab-trajectory">
+          <section class="story-chapter current" id="chapter-1" data-chapter="0"><div class="chapter-heading"><span class="chapter-number">01</span><div><div class="eyebrow" data-i18n="chapter1Kicker">TASK & POLICY</div><h2 data-i18n="chapter1Title">A résumé to write. Information to protect.</h2></div></div><div id="story-task"></div></section>
+          <section class="story-chapter activity-section" id="chapter-2" data-chapter="1"><div class="chapter-heading"><span class="chapter-number">02</span><div><div class="eyebrow" data-i18n="chapter2Kicker">COMPLETE EXECUTION RECORD</div><h2 data-i18n="chapter2Title">Follow all 15 records, from request to reply.</h2></div></div>
+            <p class="chapter-lead" data-i18n="recordIntro">Each card is one imported record: a message, a tool call, or its return. Calls and returns stay visible separately.</p>
+            <div class="section-head activity-controls"><div class="record-total"><strong>15</strong> <span data-i18n="sourceRecords">source records</span><span class="slash">/</span><strong>2</strong> <span data-i18n="fileReads">file reads</span></div><div class="segmented" role="group" aria-label="Event display"><button data-mode="events" class="active" aria-pressed="true" data-i18n="allRecords">All 15 records</button><button data-mode="grouped" aria-pressed="false" data-i18n="grouped">4-group overview</button></div></div>
+            <div class="activity-panel"><div class="activity-toolbar"><div class="legend"><span><i class="dot source"></i><span data-i18n="sourceRead">Source read</span></span><span><i class="dot output"></i><span data-i18n="outputDisclosure">Output disclosure</span></span><span><i class="dot ordinary"></i><span data-i18n="recorded">Recorded</span></span></div><div class="scroll-controls"><span id="visible-records" class="mono"></span><button class="icon-button" id="scroll-left" aria-label="Scroll events left">←</button><button class="icon-button" id="scroll-right" aria-label="Scroll events right">→</button></div></div>
+              <div class="mini-timeline" id="mini-timeline" aria-label="Navigate all source events"></div>
+              <div class="activity-track" id="activity-track" tabindex="0" aria-label="Agent event timeline"></div>
+              <div class="activity-footer"><span id="activity-caption"></span><button class="text-button" data-event="14" data-i18n="runtimeContext">Runtime context · record 14 ↗</button></div>
+            </div>
+            <div class="story-callout timeline-callout"><span data-i18n="recordNote">Records 10 and 11 are one read call and its return. Records 12 and 13 preserve the tool message and wrapper result.</span><div class="story-actions"><button class="story-button" data-event="10" data-i18n="jumpSource">Jump to the source read ↗</button><button class="story-button" data-event="15" data-i18n="jumpOutput">Jump to the final reply ↗</button></div></div>
+          </section>
+          <section class="story-chapter" id="chapter-3" data-chapter="2"><div class="chapter-heading"><span class="chapter-number">03</span><div><div class="eyebrow" data-i18n="chapter3Kicker">ENTITIES & FACTS</div><h2 data-i18n="chapter3Title">Turn a recorded action into queryable evidence.</h2></div></div><div id="story-entities"></div></section>
+          <section class="story-chapter" id="chapter-4" data-chapter="3"><div class="chapter-heading"><span class="chapter-number">04</span><div><div class="eyebrow" data-i18n="chapter4Kicker">AUTOMATIC POLICY CHECKS</div><h2 data-i18n="chapter4Title">An allowed path can still return restricted data.</h2></div></div><div id="story-checks"></div></section>
+          <section class="story-chapter review-section" id="chapter-5" data-chapter="4"><div class="chapter-heading"><span class="chapter-number">05</span><div><div class="eyebrow" data-i18n="chapter5Kicker">MODEL INVESTIGATION</div><h2 data-i18n="chapter5Title">Watch the investigation move from facts to findings.</h2></div></div>
+            <p class="chapter-lead" data-i18n="investigationIntro">Open a stage to see what it used and produced. TRACE contains the actual evidence queries; Review log contains the saved model calls.</p>
+            <div class="review-actions"><button id="review-reset" class="text-button" data-i18n="resetView">Reset view</button><button id="replay-button" class="primary-button"><span class="play-icon">▶</span><span data-i18n="replay">Replay review</span></button></div>
+            <div class="stage-canvas"><div class="stage-track" id="stage-track"></div></div>
+            <div class="stage-insight" id="stage-insight"></div><div class="stage-inline" id="stage-inline"></div>
+          </section>
+          <section class="story-chapter" id="chapter-6" data-chapter="5"><div class="chapter-heading"><span class="chapter-number">06</span><div><div class="eyebrow" data-i18n="chapter6Kicker">SOURCE LOCALIZATION</div><h2 data-i18n="chapter6Title">Trace the ID in the draft back to its source.</h2></div></div><div id="story-trail"></div><section class="findings-strip" aria-label="Model findings"><div class="section-head compact"><h3 data-i18n="twoFindings">Two findings. One source trail.</h3><button class="text-button" data-view="findings" data-i18n="allFindings">View findings →</button></div><div id="finding-tiles" class="finding-tiles"></div></section></section>
+        </section>
+        <section id="view-graph" class="view" role="tabpanel" aria-labelledby="tab-graph" hidden><div class="section-head"><div><div class="eyebrow" data-i18n="evidenceStructure">EVIDENCE STRUCTURE</div><h2 data-i18n="followData">Follow the data through the record.</h2></div></div><div class="graph-panel" id="graph-panel"></div><div class="fact-toolbar"><h3 data-i18n="factCatalog">Fact catalog</h3><div class="fact-filters"><select id="fact-filter" aria-label="Fact origin"><option value="all" data-i18n="allFacts">All facts</option><option value="base" data-i18n="baseFacts">Structural facts</option><option value="semantic" data-i18n="semanticFacts">Semantic facts</option></select><input id="fact-search" type="search" placeholder="Search fact, relation, or text" aria-label="Search facts"></div></div><div class="fact-table-wrap"><table class="fact-table"><thead><tr><th>Fact</th><th data-i18n="record">Record</th><th data-i18n="relation">Relation</th><th data-i18n="value">Value</th></tr></thead><tbody id="fact-table"></tbody></table></div><div class="fact-count" id="fact-count"></div></section>
+        <section id="view-findings" class="view" role="tabpanel" aria-labelledby="tab-findings" hidden><div class="section-head"><div><div class="eyebrow" data-i18n="reviewResult">REVIEW RESULT</div><h2 data-i18n="evidenceToConclusion">From evidence to conclusion.</h2></div><span class="badge completed" data-i18n="completed">Completed</span></div><div class="result-lead" id="result-lead"></div><div id="result-cards"></div><div class="section-head compact"><h3 data-i18n="automaticChecks">Automatic policy checks</h3><span class="small muted" data-i18n="separateSources">Results by check scope</span></div><div id="policy-checks"></div></section>
+      </div>
+      <aside class="inspector" id="inspector" aria-label="Evidence inspector" hidden><div class="inspector-header"><div><div class="eyebrow" data-i18n="inspector">INSPECTOR</div><h2 id="inspector-title"></h2></div><button id="inspector-close" class="icon-button" aria-label="Collapse inspector">×</button></div><div class="inspector-tabs" role="tablist"><button class="active" data-detail="evidence" role="tab" aria-selected="true" data-i18n="evidence">Evidence</button><button data-detail="source" role="tab" aria-selected="false" data-i18n="source">Source</button><button data-detail="review" role="tab" aria-selected="false" data-i18n="reviewLog">Review log</button></div><div class="inspector-content" id="inspector-content" aria-live="polite"></div></aside>
+      <button class="inspector-reopen icon-button" id="inspector-reopen" aria-label="Open evidence inspector">‹</button>
+    </div>
+    <footer class="page-footer"><span>ProDebugger <span class="slash">/</span> <span data-i18n="footer">Evidence-grounded privacy review</span></span><span class="mono">ca30-d27b918e <span class="slash">·</span> <span data-i18n="offlineReady">OFFLINE READY</span></span></footer>
+  </main>
+  <dialog id="policy-dialog"><div class="dialog-head"><div><div class="eyebrow" data-i18n="reviewScope">REVIEW SCOPE</div><h2 data-i18n="taskPolicyTitle">Task & company policy</h2></div><button class="icon-button" id="dialog-close" aria-label="Close dialog">×</button></div><div id="policy-content"></div></dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <div class="presentation-controls" id="presentation-controls" hidden><button class="subtle-button" id="chapter-prev" data-i18n="previousChapter">← Previous</button><div><span id="chapter-position" class="mono">01 / 06</span><span id="chapter-control-title"></span></div><button class="primary-button" id="chapter-next" data-i18n="nextChapter">Next →</button></div>
+  <script id="case-data" type="application/json">/*__CASE_DATA__*/</script>
+  <script>/*__APP__*/</script>
+</body>
+</html>

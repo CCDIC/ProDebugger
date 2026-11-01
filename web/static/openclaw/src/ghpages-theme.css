@@ -1,0 +1,219 @@
+/* Visual skin adapted from GaloisH/ProDebugger gh-pages, commit
+   368b0109998e7d5eead39f0c88ea69d05cf02e87, css/theme.css and workbench.css.
+   Structural layout remains in style.css and story.css. */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #080b0f;
+  --bg-lift: #0a0e13;
+  --paper: #0d131a;
+  --card: #131b23;
+  --header-bg: #0c1015;
+  --soft: #0a0e12;
+  --surface-2: #11181f;
+  --panel-3: #1c2833;
+  --hover: #243240;
+  --ink: #e6eaee;
+  --text: #c3ccd5;
+  --muted: #98a5b3;
+  --faint: #7a8998;
+  --line: #1e2933;
+  --line2: #2c3a47;
+  --line-soft: #18222b;
+  --amber: #e0b867;
+  --amber-bg: #262111;
+  --accent-strong: #d9a94a;
+  --accent-hover: #e3b95e;
+  --accent-line: #8a7240;
+  --accent-line2: #d9a94a;
+  --active-ink: #f0d9a0;
+  --active-soft: #1d1a10;
+  --on-accent: #1a1406;
+  --focus: #e0b867;
+  --selection-bg: #5a4a22;
+  --selection-ink: #fff;
+  --risk: #efcf86;
+  --risk-bg: #33280c;
+  --risk-line: #8a6e2a;
+  --ok-bg: #10281a;
+  --ok-line: #3d7a55;
+  --ok-ink: #8fdca6;
+  --info-bg: #102842;
+  --info-line: #3d6a9a;
+  --info-ink: #a2c9f0;
+  --teal: #a6dcdf;
+  --parse: #8d9aa8;
+  --blue: #7fa7d9;
+  --purple: #b39ad6;
+  --trace: #e08a62;
+  --green: #8cc49a;
+  --bar: #243240;
+  --bar-strong: #3a4a59;
+  --edge: #52626f;
+  --grid-dot: #ffffff0b;
+  --shadow: 0 10px 24px #0000001f;
+  --shadow-soft: #0006;
+  --sans: 'IBM Plex Sans', 'Segoe UI', 'Microsoft YaHei UI', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', 'Cascadia Mono', Consolas, monospace;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f2ec;
+  --bg-lift: #f8f6f1;
+  --paper: #fbfaf7;
+  --card: #fff;
+  --header-bg: #fbfaf7;
+  --soft: #efebe2;
+  --surface-2: #f5f2eb;
+  --panel-3: #f6f2e9;
+  --hover: #ede7da;
+  --ink: #1b2127;
+  --text: #36404a;
+  --muted: #5d6772;
+  --faint: #78828c;
+  --line: #e6e0d3;
+  --line2: #d4cbb8;
+  --line-soft: #ece7dc;
+  --amber: #96660a;
+  --amber-bg: #fbf0d6;
+  --accent-strong: #e0b867;
+  --accent-hover: #d9a94a;
+  --accent-line: #d6b062;
+  --accent-line2: #c99a3c;
+  --active-ink: #74500b;
+  --active-soft: #fdf6e6;
+  --focus: #b07d16;
+  --selection-bg: #f3d9a0;
+  --selection-ink: #12161b;
+  --risk: #75520a;
+  --risk-bg: #fdf3dc;
+  --risk-line: #d6b05a;
+  --ok-bg: #e7f4eb;
+  --ok-line: #82bf96;
+  --ok-ink: #22663b;
+  --info-bg: #e7f0fb;
+  --info-line: #88afdb;
+  --info-ink: #24548a;
+  --teal: #1e6265;
+  --parse: #687583;
+  --blue: #3f73b3;
+  --purple: #7b5bb6;
+  --trace: #c25f2c;
+  --green: #3d8650;
+  --bar: #e2dccf;
+  --bar-strong: #c8bfac;
+  --edge: #959ea6;
+  --grid-dot: #3a2f1a1f;
+  --shadow-soft: #3a2f1a2e;
+}
+
+body {
+  background: linear-gradient(125deg, var(--bg), var(--bg-lift) 55%, var(--bg)) fixed;
+}
+::selection { background: var(--selection-bg); color: var(--selection-ink); }
+* { scrollbar-color: var(--bar-strong) var(--paper); }
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, [tabindex]:focus-visible {
+  outline-color: var(--focus);
+}
+.topbar {
+  background: var(--header-bg);
+  border-bottom-color: var(--line-soft);
+  box-shadow: 0 3px 14px #00000026;
+}
+.brand { letter-spacing: .02em; }
+.brand-mark { background: var(--surface-2); border-color: var(--line2); border-radius: .5rem; }
+.case-heading h1 { font-weight: 600; }
+.chapter-number { color: var(--amber); }
+.chapter-nav { background: var(--bg); }
+.chapter-link { border-radius: .5rem; }
+.chapter-link > span:first-child { color: var(--faint); }
+.chapter-link.active, .chapter-link.active:hover {
+  background: var(--amber-bg);
+  border-color: var(--accent-line);
+  color: var(--active-ink);
+  box-shadow: inset 0 -2px 0 var(--amber);
+}
+.chapter-link.active > span:first-child { color: var(--amber); }
+.chapter-link:not(.active):hover { background: var(--panel-3); color: var(--ink); }
+.main-tab { border-radius: .5rem .5rem 0 0; }
+.main-tab.active {
+  background: var(--amber-bg);
+  color: var(--active-ink);
+  border-bottom-color: var(--amber);
+}
+.main-tab:not(.active):hover { background: var(--panel-3); color: var(--ink); }
+.primary-button {
+  background: var(--accent-strong);
+  color: var(--on-accent);
+  box-shadow: inset 0 0 0 1px var(--accent-line2);
+  border-radius: .5rem;
+  font-weight: 600;
+}
+.primary-button:hover { background: var(--accent-hover); opacity: 1; }
+.icon-button, .story-button, .citation {
+  background: var(--panel-3);
+  border-color: var(--line2);
+  border-radius: .5rem;
+}
+.icon-button { color: var(--muted); }
+.icon-button:hover { background: var(--hover); border-color: var(--line2); color: var(--ink); }
+.story-button:hover, .citation:hover {
+  background: var(--amber-bg);
+  border-color: var(--accent-line);
+  color: var(--active-ink);
+}
+.segmented { background: var(--soft); }
+.segmented button.active {
+  background: var(--amber-bg);
+  color: var(--active-ink);
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+}
+.badge { border-radius: .4rem; }
+.badge.neutral { background: var(--panel-3); border-color: var(--line2); }
+.badge.risk { color: var(--risk); background: var(--risk-bg); border-color: var(--risk-line); }
+.badge.completed, [data-theme="dark"] .badge.completed {
+  color: var(--ok-ink); background: var(--ok-bg); border-color: var(--ok-line);
+}
+.story-card, .event-card, .graph-node, .result-card, .result-lead,
+.stage-inline, .finding-tile { background: var(--card); border-radius: .9rem; }
+.story-card, .event-card, .graph-node, .result-card { box-shadow: var(--shadow); }
+.story-card.story-risk, .event-card.risk, .graph-node.risk { border-top-color: var(--risk-line); }
+.story-card.story-pass { border-top-color: var(--ok-line); }
+.story-pass .story-kicker { color: var(--ok-ink); }
+.event-card:hover { border-color: var(--line2); box-shadow: var(--shadow); }
+.event-card.risk:hover { border-top-color: var(--risk-line); }
+.event-card.selected {
+  outline-color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 5%, var(--card));
+}
+.event-card.related { background: var(--info-bg); border-color: var(--info-line); }
+.event-card.related.risk { border-top-color: var(--risk-line); }
+.event-card:not(:last-child)::after { color: var(--edge); }
+.dot.ordinary { background: var(--faint); }
+.mini-event { background: transparent; border-bottom-color: var(--bar); }
+.mini-event.risk { background: transparent; border-bottom-color: var(--risk-line); color: var(--risk); }
+.mini-event.selected { background: var(--amber-bg); border-bottom-color: var(--amber); color: var(--amber); }
+.mini-event.related { background: transparent; border-bottom-color: var(--blue); color: var(--blue); }
+.stage-canvas { background-color: var(--paper); background-image: radial-gradient(var(--grid-dot) .7px, transparent .7px); }
+.stage { border-radius: .9rem; }
+.stage.active { background: var(--card); box-shadow: 0 0 0 1px var(--phase), var(--shadow); }
+.stage:not(:last-child)::after { color: var(--edge); }
+.story-callout { border-left-color: var(--accent-line); background: var(--active-soft); }
+.quote { border-left-color: var(--accent-line); }
+.quote mark, pre mark, [data-theme="dark"] .quote mark, [data-theme="dark"] pre mark,
+.story-source mark { background: var(--selection-bg); color: var(--selection-ink); }
+.story-id-quote { color: var(--risk); border-left-color: var(--risk-line); }
+.story-source, .code-block, .story-quote { background: var(--soft); }
+.story-rule { background: var(--surface-2); }
+.story-table th { background: var(--surface-2); }
+.inspector { background: var(--paper); box-shadow: 0 12px 28px var(--shadow-soft); }
+.inspector-header { background: var(--surface-2); }
+.inspector-tabs button.active { color: var(--active-ink); border-bottom-color: var(--amber); }
+.inspector-reopen { background: var(--surface-2); border-color: var(--line2); }
+.presentation-controls { background: var(--paper); box-shadow: 0 12px 28px var(--shadow-soft); }
+dialog { box-shadow: 0 12px 28px var(--shadow-soft); }
+dialog::backdrop { background: #080b0fb3; }
+.workbench-link { text-decoration: none; white-space: nowrap; }
+@media (max-width: 600px) { .workbench-link { font-size: 10px; padding: 6px 3px; } }

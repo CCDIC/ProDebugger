@@ -1,0 +1,13 @@
+const fs = require('fs');
+const path = require('path');
+const root = __dirname;
+const source = name => fs.readFileSync(path.join(root, 'src', name), 'utf8');
+const fontRoot = path.join(root, '..', 'fonts');
+const fonts = [['IBM Plex Sans','ibm-plex-sans-latin-400-normal.woff2',400],['IBM Plex Sans','ibm-plex-sans-latin-500-normal.woff2',500],['IBM Plex Sans','ibm-plex-sans-latin-600-normal.woff2',600],['IBM Plex Mono','ibm-plex-mono-latin-400-normal.woff2',400],['IBM Plex Mono','ibm-plex-mono-latin-500-normal.woff2',500]].map(([family,file,weight])=>`@font-face{font-family:'${family}';font-weight:${weight};font-style:normal;font-display:swap;src:url(data:font/woff2;base64,${fs.readFileSync(path.join(fontRoot,file)).toString('base64')}) format('woff2')}`).join('\n');
+const data = JSON.parse(fs.readFileSync(path.join(root,'assets','case-data.json'),'utf8').replace(/^\uFEFF/,''));
+const styles=source('style.css').replace('/*__FONTS__*/',()=>fonts)+'\n'+source('story.css')+'\n'+source('ghpages-theme.css');
+const license=fs.readFileSync(path.join(fontRoot,'LICENSE.txt'),'utf8').replace(/--/g,'—');
+const html=source('template.html').replace('<head>',()=>`<head>\n<!-- Embedded IBM Plex fonts: ${license} -->`).replace('/*__STYLES__*/',()=>styles).replace('/*__CASE_DATA__*/',()=>JSON.stringify(data).replace(/</g,'\\u003c')).replace('/*__APP__*/',()=>(source('story.js')+'\n'+source('app.js')).replace(/<\/script/gi,'<\\/script'));
+fs.writeFileSync(path.join(root,'index.html'),html,'utf8');
+fs.copyFileSync(path.join(fontRoot,'LICENSE.txt'),path.join(root,'FONT-LICENSE.txt'));
+console.log(JSON.stringify({file:path.join(root,'index.html'),bytes:Buffer.byteLength(html),events:data.events.length,facts:data.facts.length,modelFindings:data.findings.filter(f=>f.source==='model').length},null,2));

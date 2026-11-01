@@ -151,6 +151,7 @@ export function mountHome(root) {
           <button type="button" data-scroll="use-cases">Use cases</button>
         </nav>
         <nav class="home-actions" aria-label="Pages">
+          <a href="./openclaw/index.html">OpenClaw</a>
           <a href="#/runs">Runs</a>
           <a href="#/chat">Chat</a>
           <a class="h-btn primary small" href="#/runs">Open workbench</a>
