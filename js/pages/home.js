@@ -30,10 +30,10 @@ function heroCapabilities() {
 }
 
 function openClawApplication() {
-  return `<aside class="hero-openclaw" aria-label="Upcoming OpenClaw application">
+  return `<a class="hero-openclaw" href="./openclaw/index.html" aria-label="OpenClaw privacy case study">
     <span class="hero-openclaw-mark" aria-hidden="true">${icon('<path d="M8 5 4 9l4 4M16 5l4 4-4 4M9 19h6M12 13v6"/>')}</span>
-    <div><div class="hero-openclaw-heading"><strong>OpenClaw in the real world</strong><span>In preparation</span></div><p>A forthcoming case study in privacy and governance.</p></div>
-  </aside>`;
+    <div><div class="hero-openclaw-heading"><strong>OpenClaw in the real world</strong><span>Case study</span></div><p>Where did the ID number come from? A privacy investigation of an OpenClaw agent.</p></div>
+  </a>`;
 }
 
 // Closing section: where the same queryable trajectory leads. Each scene is a use case, a
@@ -223,6 +223,7 @@ export function mountHome(root) {
           <button type="button" data-scroll="next">What's next</button>
         </nav>
         <nav class="home-actions" aria-label="Pages">
+          <a href="./openclaw/index.html">OpenClaw</a>
           <a href="#/runs">Runs</a>
           <a href="#/chat">Chat</a>
           <a class="h-btn primary small" href="#/runs">Open workbench</a>
@@ -239,7 +240,7 @@ export function mountHome(root) {
           ${heroCapabilities()}
           <div class="hero-ctas">
             <a class="h-btn primary" href="${CLOUD_CASE_HREF}">Explore the trajectory ${ARROW}</a>
-            <button class="h-btn hero-openclaw-cta" type="button" disabled title="The OpenClaw case study is not available yet">OpenClaw case <span>Coming soon</span></button>
+            <a class="h-btn hero-openclaw-cta" href="./openclaw/index.html">OpenClaw case ${ARROW}</a>
           </div>
         </div>
         <div class="hero-visual" data-reveal><div class="hero-preview-label"><span>INSIDE AN INVESTIGATION</span><span class="hero-preview-status"><i></i> Interactive preview</span></div>${heroShots()}${openClawApplication()}</div>

@@ -94,6 +94,8 @@ body.page-home .app { padding: 0; }
 .hero-openclaw-heading strong { font-size:var(--fs-card-p); font-weight:600; }
 .hero-openclaw-heading span { padding:.1rem .4rem; border:1px solid var(--h-line-2); border-radius:1rem; color:var(--h-muted); font-size:var(--fs-meta); letter-spacing:.025em; white-space:nowrap; }
 .hero-openclaw p { margin:.3rem 0 0; color:var(--h-muted); font-size:var(--fs-card-p); line-height:1.5; }
+a.hero-openclaw { color:inherit; text-decoration:none; transition:border-color .15s, transform .15s; }
+a.hero-openclaw:hover { border-color:var(--h-accent-ink); transform:translateY(-1px); }
 .hero-copy:has(.hero-capabilities) .hero-ctas { margin-top:1.15rem; }
 .hero-copy .paper-links { margin-top:1.05rem; gap:.45rem; }
 .home .hero-copy .paper-link { border:1px solid var(--h-line-2); padding:.4rem .75rem; background:transparent; color:var(--h-ink-2); font-size:var(--fs-card-p); font-weight:500; }
