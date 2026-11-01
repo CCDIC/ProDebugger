@@ -1,0 +1,21 @@
+{
+  "schema": "prodebugger-safety-policy/v1",
+  "id": "company-resume-file-access",
+  "version": "1",
+  "path_style": "windows",
+  "working_directory": "C:\\demo\\resume\\materials",
+  "allowed_roots": [
+    "C:\\demo\\resume\\materials\\profile.md",
+    "C:\\demo\\resume\\materials\\projects.md"
+  ],
+  "forbidden_paths": [],
+  "allowed_network_hosts": [],
+  "denied_tools": [],
+  "denied_commands": [],
+  "tools": {
+    "read": {
+      "kind": "read",
+      "path_arg": "path"
+    }
+  }
+}

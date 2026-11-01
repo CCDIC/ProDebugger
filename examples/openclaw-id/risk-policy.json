@@ -1,0 +1,143 @@
+{
+  "schema": "prodebugger-risk-policy/v1",
+  "id": "company-resume-field-policy",
+  "version": "2",
+  "path_style": "windows",
+  "working_directory": "C:\\demo\\resume\\materials",
+  "tools": {
+    "read": {
+      "kind": "read",
+      "path_arg": "path"
+    }
+  },
+  "read_scope": {
+    "allowed_roots": [
+      "C:\\demo\\resume\\materials\\profile.md",
+      "C:\\demo\\resume\\materials\\projects.md"
+    ],
+    "forbidden_paths": []
+  },
+  "approvals": [],
+  "protected_writes": [],
+  "untrusted_sources": [],
+  "sensitive_sources": [],
+  "privacy_rules": [
+    {
+      "id": "company-national-id",
+      "category": "national_id",
+      "description": "居民身份证及政府身份号码。National identity / government identity numbers, including fictional demonstrator values under an explicit identity field. Company policy independently prohibits acquisition, entry into model context, and disclosure of these fields. 文件路径允许访问不代表允许获取其中受限字段；禁止获取、进入模型上下文和输出。",
+      "labels": [
+        "身份证号",
+        "身份证号码",
+        "居民身份证号",
+        "身份证",
+        "National ID",
+        "National ID number",
+        "Government ID",
+        "Government ID number",
+        "Identity card number",
+        "ID card number"
+      ],
+      "subject_labels": [
+        "姓名",
+        "员工姓名",
+        "简历姓名",
+        "Name",
+        "Employee name",
+        "Candidate"
+      ],
+      "allow_acquire": false,
+      "allow_in_context": false,
+      "allow_in_output": false
+    },
+    {
+      "id": "company-personal-identifier",
+      "category": "personal_identifier",
+      "description": "个人或员工身份标识。Personal and employee identifiers; project IDs, task IDs, trace IDs and technical record IDs are not personal identifiers. Company policy independently prohibits acquisition, entry into model context, and disclosure of these fields. 文件路径允许访问不代表允许获取其中受限字段；禁止获取、进入模型上下文和输出。",
+      "labels": [
+        "个人ID",
+        "个人 ID",
+        "人员ID",
+        "人员 ID",
+        "员工ID",
+        "员工 ID",
+        "工号",
+        "员工编号",
+        "Personal ID",
+        "Personnel ID",
+        "Employee ID",
+        "Employee number",
+        "Staff ID"
+      ],
+      "subject_labels": [
+        "姓名",
+        "员工姓名",
+        "简历姓名",
+        "Name",
+        "Employee name",
+        "Candidate"
+      ],
+      "allow_acquire": false,
+      "allow_in_context": false,
+      "allow_in_output": false
+    },
+    {
+      "id": "company-employment-grade",
+      "category": "employment_grade",
+      "description": "人员职级或雇佣等级。Employee employment grade / job level, not project priority, software version, or a generic professional skill. Company policy independently prohibits acquisition, entry into model context, and disclosure of these fields. 文件路径允许访问不代表允许获取其中受限字段；禁止获取、进入模型上下文和输出。",
+      "labels": [
+        "职级",
+        "职位级别",
+        "岗位级别",
+        "员工等级",
+        "Job grade",
+        "Employment grade",
+        "Job level",
+        "Employee grade",
+        "Employment level"
+      ],
+      "subject_labels": [
+        "姓名",
+        "员工姓名",
+        "简历姓名",
+        "Name",
+        "Employee name",
+        "Candidate"
+      ],
+      "allow_acquire": false,
+      "allow_in_context": false,
+      "allow_in_output": false
+    },
+    {
+      "id": "company-salary",
+      "category": "salary",
+      "description": "个人工资和报酬。Personal salary / wages / compensation; project budgets and project expenditure are not personal salary. Company policy independently prohibits acquisition, entry into model context, and disclosure of these fields. 文件路径允许访问不代表允许获取其中受限字段；禁止获取、进入模型上下文和输出。",
+      "labels": [
+        "工资",
+        "薪水",
+        "薪资",
+        "薪酬",
+        "月薪",
+        "年薪",
+        "Salary",
+        "Monthly salary",
+        "Annual salary",
+        "Wage",
+        "Wages",
+        "Pay",
+        "Compensation"
+      ],
+      "subject_labels": [
+        "姓名",
+        "员工姓名",
+        "简历姓名",
+        "Name",
+        "Employee name",
+        "Candidate"
+      ],
+      "allow_acquire": false,
+      "allow_in_context": false,
+      "allow_in_output": false
+    }
+  ]
+}

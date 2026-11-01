@@ -1,0 +1,114 @@
+{
+  "schema": "prodebugger-publication/v1",
+  "case_id": "ca30-d27b918e",
+  "constructed": true,
+  "executed": false,
+  "publication": "privacy_normalized_public_copy",
+  "model_calls_during_publication": 0,
+  "sources": [
+    {
+      "logical_artifact": "content-access-review-20261030/import-package/01_身份证进入简历_构造轨迹.json",
+      "sha256": "faeb0facba7d364a98893a6806d6195dad6cdadd7eec12530ea9d38e9c7f1e38",
+      "hash_scope": "historical_private_source_provenance_only"
+    },
+    {
+      "logical_artifact": "ProDebugger-offline-story-20261031/assets/case-data.json",
+      "sha256": "91cfc1f46e6f159096182afba9b00c81e9b1564828d5a0da8eeb902bf122a52d",
+      "hash_scope": "historical_private_source_provenance_only"
+    }
+  ],
+  "published_files": [
+    {
+      "path": "examples/openclaw-id/trajectory.json",
+      "sha256": "b1209c6cb7b0749b1ed7a138ac9ac10e5ed0116175cbe08f0edaa9a6f96f1b37",
+      "hash_scope": "published_file_bytes"
+    },
+    {
+      "path": "examples/openclaw-id/policy.json",
+      "sha256": "e7be967fddcfc1424f278261c007b639789e96212e07266cb415ed1051509f99",
+      "hash_scope": "published_file_bytes"
+    },
+    {
+      "path": "examples/openclaw-id/risk-policy.json",
+      "sha256": "5f4ab5e06f26821b6f3f59ee61fb5e135cb4d3d900c678b1ff79d2d2fbd0c87a",
+      "hash_scope": "published_file_bytes"
+    },
+    {
+      "path": "web/static/openclaw/assets/case-data.json",
+      "sha256": "448fefc98345ce085bd506bc154aa0ef5f5f892b59fb33d68c4a72b27dc5c302",
+      "hash_scope": "published_file_bytes"
+    },
+    {
+      "path": "examples/openclaw-id/import.json",
+      "sha256": "2e6816ec135d742827deea040ccd5aea8e72013176b2b7956120871cedaec3ca",
+      "hash_scope": "published_file_bytes"
+    }
+  ],
+  "raw_document_mapping": [
+    {
+      "name": "01-openclaw-harness-run-9e91bd1b04681dd0.json",
+      "source_provenance_sha256": "a82386c21ef90c26db1d0c7dacb5cb7092372c627521385915fb7a0084e1f1fb",
+      "published_sha256": "a156f8a667e799362a693e5ae4b8344aa01d707f174d5d2fb2305e6e7986e2ee"
+    },
+    {
+      "name": "02-openclaw-run-1f514316d59ca2bd.json",
+      "source_provenance_sha256": "6aaf574cb851329d735cab09a1335f8a6806a1eabbbbc696d29704b3f1f565aa",
+      "published_sha256": "a92cc9acc41d15f5dd3d4ff4b19a6122c17f29e668df53815e80f9c03c1e9a5e"
+    },
+    {
+      "name": "03-openclaw-context-assembled-d7e24865270ea25a.json",
+      "source_provenance_sha256": "f5a1f8ea5116eb0fbe411a9abdc5b3482ef453b5b6ca226a1af87a3ce1d09f51",
+      "published_sha256": "21d40e6288c763736ed194bf656d00fa4511eaa206c68bbaec191b44b33fb741"
+    },
+    {
+      "name": "04-openclaw-model-call-388393e4dda58c61.json",
+      "source_provenance_sha256": "a5a8c0cdcb5662bd2230224eb77e7ba57b78c86e1ddd7c5d92489908009573e5",
+      "published_sha256": "2bc07a5f5a9b07aef444a866dd657c7e00ab7acefc5c3fb4bd3d427b57383169"
+    },
+    {
+      "name": "05-openclaw-tool-execution-a79596c3fb40377b.json",
+      "source_provenance_sha256": "08ae9ba0c299706cd676a1bf9e9bb44975e69a7f7ea33cfda88f626c4f9c8762",
+      "published_sha256": "6bfc8ed6e415ebf944eb78036a804eb1ee6a9414d0027d075a176c7f36a37908"
+    },
+    {
+      "name": "06-openclaw-model-call-f2dae75cfe3887ef.json",
+      "source_provenance_sha256": "ed7d85698cdeaeb096d61e9e7ccc01e899f04db5b8f15a5654818ebe1edbd233",
+      "published_sha256": "d5ea70859ec84f29389f418810f1764de6c919243de74971383b3b2b905523a6"
+    },
+    {
+      "name": "07-openclaw-tool-execution-90299835f61c7425.json",
+      "source_provenance_sha256": "c0a6f776693e7c8a264ec9234200305a438048b7cd511b2f4868462fd1315e6e",
+      "published_sha256": "22b322d1228549d4b4968c6ec03b9f88b884aaa3986e46e53843058a4da5180b"
+    },
+    {
+      "name": "08-openclaw-model-call-266f58803d8d21db.json",
+      "source_provenance_sha256": "22920f3e6f650b058b3821b1d34f43786028fe8d2e461b2ec61ee4a13379e786",
+      "published_sha256": "897c0663a53174d95e18da8316b2ca51d003f68ab6e6cd2bf4a343d81799d3ac"
+    }
+  ],
+  "event_identity_mapping": [
+    {
+      "step": 1,
+      "source_event_id": "message:412320a909c1e858b223",
+      "published_event_id": "message:ab027dc61e2407cb4753"
+    }
+  ],
+  "file_identity_mapping": [
+    {
+      "fid": 40,
+      "source_file_id": "ab891905d819eb679b26",
+      "published_file_id": "f0d74af8594e4c4a76ff"
+    },
+    {
+      "fid": 47,
+      "source_file_id": "7610fffe9860505d2345",
+      "published_file_id": "c388875239b3fae9eb1a"
+    }
+  ],
+  "historical_ids_retained": [
+    "trace/span/tool call IDs",
+    "fact IDs 0..89",
+    "semantic item IDs",
+    "saved audit call IDs"
+  ]
+}
