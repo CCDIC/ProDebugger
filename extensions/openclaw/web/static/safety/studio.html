@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>ProDebugger · Trace Risk Review</title>
+  <link rel="stylesheet" href="analysis.css">
+  <link rel="stylesheet" href="studio.css">
+  <link rel="stylesheet" href="session-view.css">
+  <link rel="stylesheet" href="risk-view.css">
+  <link rel="stylesheet" href="showcase.css">
+  <link rel="stylesheet" href="semantics-view.css">
+  <script src="i18n-catalog.js" defer></script>
+  <script src="i18n-generated.js" defer></script>
+  <script src="i18n.js" defer></script>
+  <script src="analysis-ui.js" defer></script>
+  <script src="session-view.js" defer></script>
+  <script src="studio-detail.js" defer></script>
+  <script src="risk-view.js" defer></script>
+  <script src="privacy-view.js" defer></script>
+  <link rel="stylesheet" href="privacy-view.css">
+  <script src="showcase.js" defer></script>
+  <script src="semantics-view.js" defer></script>
+  <script src="cloud-view.js" defer></script>
+  <script src="studio.js" defer></script>
+</head>
+<body data-panel="workspace">
+  <a class="skip-link" href="#main-workspace">跳到轨迹工作区</a>
+  <header class="app-header">
+    <div class="brand" aria-label="ProDebugger 轨迹工作台">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M7 6h7a5 5 0 0 1 0 10h-3v6H7V6Zm4 4v2h3a1 1 0 0 0 0-2h-3Z" fill="currentColor"/><circle cx="21" cy="21" r="3" fill="currentColor"/></svg></span>
+      <span class="brand-name">ProDebugger</span><span class="brand-separator">/</span><span class="brand-context">轨迹风险审查</span>
+    </div>
+    <nav class="header-actions" aria-label="工作台操作">
+      <button id="import-open" class="button primary" type="button"><span aria-hidden="true">＋</span> 导入轨迹</button>
+      <button id="sample-open" class="button" type="button">随机抽样</button>
+      <button id="capture-open" class="button" type="button">受控采集</button>
+      <span class="action-separator" aria-hidden="true"></span>
+      <button id="jobs-open" class="button quiet" type="button">诊断队列</button>
+      <details class="mobile-more"><summary aria-label="更多工作台操作">更多 <span aria-hidden="true">⌄</span></summary><div class="mobile-more-menu"><button data-toolbar-action="sample-open" type="button">随机抽样</button><button data-toolbar-action="capture-open" type="button">受控采集</button><button data-toolbar-action="jobs-open" type="button">诊断记录与队列</button></div></details>
+      <button id="help-open" class="icon-button" type="button" title="使用说明" aria-label="打开使用说明">?</button>
+    </nav>
+    <label class="language-control"><span class="sr-only">界面语言</span><select id="language-select" aria-label="界面语言"><option value="en">English</option><option value="zh" data-i18n-skip>中文</option></select></label>
+    <span id="service-status" class="service-status" role="status">连接中</span>
+  </header>
+
+  <div id="workspace-message" class="workspace-message" role="status" hidden></div>
+
+  <div class="app-layout">
+    <aside class="library-panel" aria-label="轨迹库">
+      <div class="panel-heading"><h1>轨迹库 <span id="pool-count" class="count-label">—</span></h1><button id="refresh-all" class="icon-button" type="button" title="刷新轨迹与诊断状态" aria-label="刷新轨迹与诊断状态">↻</button></div>
+      <div class="library-controls">
+        <label class="search-field"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="pool-search" type="search" placeholder="搜索名称或 ID" aria-label="搜索轨迹"></label>
+        <div class="filter-fields">
+          <label><span>来源</span><select id="pool-scope"><option value="all">全部来源</option><option value="risk_validation">开发验收案例</option><option value="risk_holdout">独立保留测试集</option><option value="session">完整原生会话</option><option value="validation">定位验证样本</option><option value="user_import">导入的轨迹</option><option value="controlled_tool_runtime">受控工具采集</option><option value="historical_openclaw">历史 OpenClaw</option></select></label>
+          <label><span>基础安全</span><select id="pool-filter"><option value="all">全部状态</option><option value="unsafe">基础策略违规</option><option value="safe">基础检查通过</option><option value="unknown">证据不足</option></select></label>
+        </div>
+        <button id="risk-examples-open" class="button risk-quickstart" type="button">载入开发验收案例</button>
+        <button id="risk-holdout-open" class="button full-width" type="button">载入独立保留测试集</button>
+      </div>
+      <div class="library-list-heading"><label><input id="select-visible" type="checkbox"> 全选筛选结果</label><button id="deleted-open" class="toolbar-button" type="button">回收站</button></div>
+      <div id="pool-list" class="pool-list" role="list" aria-label="可用轨迹"><div class="empty small">正在读取轨迹…</div></div>
+      <div class="selection-bar">
+        <div><span id="selection-count">未选择轨迹</span></div>
+        <button id="compare-selected" class="button primary full-width" type="button">放入工作区对比</button>
+        <button id="risk-selected" class="button full-width" type="button">完整风险审查所选轨迹</button>
+        <button id="diagnose-selected" class="button quiet full-width risk-batch-task" type="button">任务诊断所选轨迹</button>
+        <button id="delete-selected" class="button quiet danger full-width" type="button" disabled>删除所选轨迹</button>
+      </div>
+    </aside>
+
+    <main id="main-workspace" class="main-workspace" tabindex="-1">
+      <header class="workspace-heading">
+        <div class="workspace-heading-copy"><h2 id="context-title">轨迹风险工作区</h2><p id="context-subtitle"></p></div>
+        <div class="workspace-heading-actions"><button id="risk-active" class="button primary" type="button" disabled>完整风险审查</button><button id="diagnose-active" class="button quiet" type="button" disabled>任务诊断</button><button id="toggle-detail" class="icon-button" type="button" aria-label="展开或收起详情" title="展开或收起详情"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M12 4v12"/></svg></button></div>
+      </header>
+      <div id="semantic-workflow" aria-live="polite"></div>
+      <div id="privacy-workflow" aria-live="polite"></div>
+      <div class="canvas-toolbar">
+        <div id="view-mode" class="segmented" role="group" aria-label="轨迹展示方式"><button data-view="session" class="active" type="button" aria-pressed="true">完整会话</button><button data-view="states" type="button" aria-pressed="false">状态表</button><button data-view="coverage" type="button" aria-pressed="false">覆盖核对</button><button data-view="calls" type="button" aria-pressed="false">工具调用</button><button data-view="entities" type="button" aria-pressed="false">实体关系</button></div>
+        <span id="loaded-count" class="canvas-count">0 条轨迹</span>
+        <div class="canvas-toolbar-actions"><div class="zoom-controls" role="group" aria-label="实体关系图缩放" title="实体关系视图支持缩放"><button id="zoom-out" class="icon-button" type="button" aria-label="缩小实体关系图" disabled>−</button><button id="zoom-reset" class="toolbar-button" type="button" aria-label="恢复实体关系图原始比例" disabled>100%</button><button id="zoom-in" class="icon-button" type="button" aria-label="放大实体关系图" disabled>＋</button></div><button id="export-open" class="toolbar-button" type="button">导出</button><button id="clear-workspace" class="toolbar-button" type="button">清空</button></div>
+      </div>
+      <div id="session-mode-note" hidden></div>
+      <div class="workspace-legend" aria-label="节点颜色说明"><span><i class="legend-dot error"></i>规则 / 任务错误</span><span><i class="legend-dot risk"></i>有证据的风险</span><span><i class="legend-dot warning"></i>输入警告</span><span><i class="legend-dot suspected"></i>疑似</span><span><i class="legend-dot passed"></i>适用检查通过</span><span><i class="legend-dot unknown">?</i>证据不足</span><span><i class="legend-dot neutral"></i>记录</span></div>
+      <div id="session-scope" hidden></div>
+      <div id="lanes-scroll" class="lanes-scroll" aria-label="轨迹画布" tabindex="0"><div id="lanes" class="lanes"></div><div id="empty-state" class="workspace-empty"><div class="empty-illustration" aria-hidden="true"><span></span><i></i><span></span><i></i><span></span></div><h3>先选一条轨迹，看看它做了什么</h3><p>点击左侧名称开始查看，或勾选多条并排对比。<br>想快速体验，可将来源切换为「定位验证样本」。</p><div class="empty-steps"><span><b>1</b> 查看执行过程</span><span><b>2</b> 点击问题节点</span><span><b>3</b> 核对原因与证据</span></div></div></div>
+      <div class="pagination-bar"><label>每页 <select id="page-size" aria-label="每页轨迹数量"><option value="3">3 条</option><option value="6" selected>6 条</option><option value="12">12 条</option><option value="24">24 条</option></select></label><div class="pagination-controls"><button id="prev-page" class="icon-button" type="button" aria-label="上一页">‹</button><span id="page-label">1 / 1</span><button id="next-page" class="icon-button" type="button" aria-label="下一页">›</button></div></div>
+      <details id="issues-panel" class="issues-panel" open><summary><span>发现与检查 <span id="issue-summary" class="count-label">选择轨迹后展示</span></span></summary><div id="issue-filters" class="issue-filters" role="group" aria-label="问题分类"></div><div id="issue-list" class="issue-list"><div class="empty small">暂无发现</div></div></details>
+    </main>
+
+    <aside id="detail-panel" class="detail-panel" aria-label="节点与诊断详情">
+      <header class="detail-heading"><div><p class="eyebrow">依据与上下文</p><h2 id="detail-title">轨迹详情</h2><p id="detail-caption"></p></div><button class="icon-button detail-back" data-panel-target="workspace" type="button" aria-label="关闭详情，返回执行过程" title="返回执行过程">×</button></header>
+      <div id="detail-tabs" class="detail-tabs" role="tablist" aria-label="详情内容"><button data-detail-tab="session" type="button" role="tab" aria-selected="false" aria-controls="detail-content">事件 / 状态</button><button data-detail-tab="semantics" type="button" role="tab" aria-selected="false" aria-controls="detail-content">语义解析</button><button data-detail-tab="risk" type="button" role="tab" aria-selected="false" aria-controls="detail-content">风险审查</button><button data-detail-tab="cloud" type="button" role="tab" aria-selected="false" aria-controls="detail-content" hidden>数据来源</button><button data-detail-tab="overview" class="active" type="button" role="tab" aria-selected="true" aria-controls="detail-content">检查概况</button><button data-detail-tab="evidence" type="button" role="tab" aria-selected="false" aria-controls="detail-content">事实原文</button><button data-detail-tab="diagnosis" type="button" role="tab" aria-selected="false" aria-controls="detail-content">任务诊断</button><button data-detail-tab="validation" type="button" role="tab" aria-selected="false" aria-controls="detail-content">结果比较</button></div>
+      <div id="detail-content" class="detail-content" role="tabpanel" tabindex="0"><div class="detail-welcome"><span class="detail-welcome-icon" aria-hidden="true">↖</span><h3>节点详情</h3></div></div>
+      
+    </aside>
+  </div>
+
+  <nav class="mobile-panel-tabs" aria-label="切换工作区"><button data-panel-target="library" type="button">轨迹库</button><button data-panel-target="workspace" class="active" type="button">执行过程</button><button data-panel-target="detail" type="button">详情与诊断</button></nav>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Parquet input (core/data) and run_compile
+pyarrow==21.0.0
+# Online debugger runs only (dry-run / replay / compile do not need these)
+openai>=1.0,<3
+python-dotenv>=1.0,<2
+sqlglot==27.29.0

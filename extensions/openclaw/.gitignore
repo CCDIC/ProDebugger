@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+.env
+.env.*
+!.env.example
+artifacts/
+runtime/
+data/
+sessions/
+*.log
+model.local.json

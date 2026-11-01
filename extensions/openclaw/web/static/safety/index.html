@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f5ef">
+  <title>轨迹安全审计 · ProDebugger</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23135c4e'/%3E%3Cpath d='m11 21 6 6 13-14' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#workspace">跳到审计工作台</a>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">[/]</span><strong>ProDebugger</strong><span class="brand-divider"></span><span>轨迹安全审计</span></a>
+    <div class="top-meta"><span id="connection-dot" class="status-dot"></span><span id="connection-state">正在连接本地服务</span><span class="copy-label">独立实验副本</span></div>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div><div class="eyebrow">TRACE → POLICY → EVIDENCE</div><h1 id="hero-title">把执行轨迹，变成<span>可核对的安全结论。</span></h1><p class="hero-lead">读取每一步工具调用，按你选择的规则识别越界行为。每个违规标记都能追到查询语句、原文位置和对应的 span。</p></div>
+      <div class="hero-actions"><a class="button primary" href="/explorer.html">打开多轨迹交互图谱 ↗</a><button id="run-demo" class="button primary"><span aria-hidden="true">▶</span> 运行一次采集演示</button><button id="open-import" class="button">导入我的轨迹 <span aria-hidden="true">↗</span></button><a id="parsed-top-link" class="button" href="/parsed.html">查看解析结果：实体 / 关系 / 事实 ↗</a><p>实际执行本地受控工具并采集 OTLP；<br>不是 OpenClaw agent 任务，不调用模型。<br>演示列表显示最新一批，历史采集文件保留。</p></div>
+    </section>
+    <div class="flow" aria-label="审计流程"><span><b>01</b> 工具执行与采集</span><i>→</i><span><b>02</b> 导入、读取轨迹</span><i>→</i><span><b>03</b> SQL 查询与规则检查</span><i>→</i><span><b>04</b> 结论 + 违规证据</span></div>
+    <div id="job-banner" class="job-banner" role="status" aria-live="polite" hidden></div>
+    <div id="load-error" class="error-banner" role="alert" hidden></div>
+    <section class="stats" aria-label="当前案例统计"><button class="stat unsafe" data-filter="unsafe"><span>发现违规尝试</span><strong id="count-unsafe">—</strong><small>命中明确的禁止规则</small></button><button class="stat safe" data-filter="safe"><span>本策略通过</span><strong id="count-safe">—</strong><small>证据足够，已启用规则均通过</small></button><button class="stat unknown" data-filter="unknown"><span>证据不足</span><strong id="count-unknown">—</strong><small>暂不能作出通过结论</small></button><div class="stat context-stat"><span>这三个标签怎么理解？</span><p>工具报错本身不是违规。被阻止的违规尝试仍会标记；“本策略通过”只适用于当前规则范围。</p></div></section>
+
+    <section id="workspace" class="workspace" aria-labelledby="workspace-title">
+      <div class="section-heading"><div><div class="eyebrow">AUDIT WORKSPACE</div><h2 id="workspace-title">从结论，看到具体哪一步。</h2></div><div class="heading-actions"><button id="refresh" class="text-button">刷新案例 ↻</button><a class="text-button" href="#acceptance">怎么验收 ↓</a></div></div>
+      <div class="filters"><div class="segmented" role="group" aria-label="按结论筛选"><button class="active" data-filter="all" aria-pressed="true">全部</button><button data-filter="unsafe" aria-pressed="false">违规尝试</button><button data-filter="safe" aria-pressed="false">本策略通过</button><button data-filter="unknown" aria-pressed="false">证据不足</button></div><label class="search"><span aria-hidden="true">⌕</span><input id="case-search" type="search" placeholder="查案例、规则、工具、trace ID" aria-label="搜索案例"></label><label class="origin-select"><span class="sr-only">案例来源</span><select id="origin-filter"><option value="all">所有来源</option><option value="openclaw">历史 OpenClaw</option><option value="controlled">受控工具演示</option><option value="imported">自行导入</option></select></label></div>
+      <div class="workbench"><aside class="case-pane" aria-label="案例列表"><div class="list-caption"><span id="case-count">正在读取案例…</span><span>选择一个查看 →</span></div><div id="case-list"></div></aside><article id="case-detail" class="detail-pane" aria-live="polite"><div class="empty-state"><span class="empty-icon">[/]</span><h3>正在读取审计记录</h3><p>连接本地服务后，这里会展示实际报告。</p></div></article></div>
+    </section>
+
+    <section class="policy-section" id="policy-section" aria-labelledby="policy-title"><div class="section-heading"><div><div class="eyebrow">YOUR POLICY, YOUR BOUNDARY</div><h2 id="policy-title">规则由你定义，结论由证据决定。</h2><p>编辑策略后，服务会对当前案例重新查询和审计，生成一份新的报告。</p></div><span class="badge neutral" id="policy-badge">等待策略</span></div><div class="policy-grid"><div class="policy-intro"><h3>先选一个案例，再试着改变一条规则。</h3><p>选一条通过的文件读取案例，把时间线中的完整路径加入 <code>forbidden_paths</code> 数组。重新审计后，应出现禁止路径标记；删去新增项再审，即可恢复原规则。</p><div class="policy-context" id="policy-context">还没有选择案例。</div><p class="small-note">规则变宽可能使已知行为通过；这代表权限边界改变，不能解释为模型本身变得安全。</p><button id="reset-policy" class="text-button">恢复当前案例策略 ↶</button></div><div class="policy-editor"><label for="policy-json">审计策略 JSON</label><textarea id="policy-json" spellcheck="false" aria-describedby="policy-feedback" rows="16" placeholder="等待服务提供策略…"></textarea><div class="editor-actions"><span id="policy-feedback" role="status">编辑后点击重新审计。</span><button id="reaudit" class="button primary" disabled>应用到当前案例并重新审计</button></div></div></div></section>
+
+    <section id="acceptance" class="acceptance" aria-labelledby="accept-title"><div class="section-heading"><div><div class="eyebrow">TRY IT YOURSELF</div><h2 id="accept-title">按这五步，自己看见结果。</h2><p>页面显示的是服务生成的结果；运行演示和重新审计都会实际执行后端流程。</p></div></div><div class="acceptance-steps"><div><span>1</span><h3>运行一次采集演示</h3><p>点击顶部按钮，等到采集与审计完成。新一批受控工具案例会出现在列表里。</p></div><div><span>2</span><h3>分别看三种结论</h3><p>点击“违规尝试”“本策略通过”“证据不足”，观察判定理由和采集完整性。</p></div><div><span>3</span><h3>点开一个违规标记</h3><p>核对命中的规则、工具步骤、查询 SQL、原文片段及位置。确认是被阻止还是已发生。</p></div><div><span>4</span><h3>改规则，再审一次</h3><p>先选案例，修改下方策略 JSON 后重新审计，查看新报告里的策略摘要与结论。</p></div><div><span>5</span><h3>导入与导出</h3><p>导入 ProDebugger 的 input.json 并选择适用策略。下载报告，保留判定、证据和来源摘要。</p></div></div><div class="scope-note"><strong>本轮完成什么</strong><p>提供采集后的安全规则审计、违规标记和可核对证据。它不依赖根因定位成功；也不把本地受控工具演示当作真实 OpenClaw agent 任务。</p></div></section>
+    <footer><div><strong>ProDebugger / Safety Insights</strong><span>采集 → 查询 → 规则审计 → 证据</span></div><p id="footer-meta">本地运行 · 原项目保留</p></footer>
+  </main>
+  <dialog id="evidence-dialog" aria-labelledby="evidence-title"><div class="dialog-head"><div><div class="eyebrow">FLAG EVIDENCE</div><h2 id="evidence-title">违规证据</h2></div><button class="close-button" data-close="evidence-dialog" aria-label="关闭证据">×</button></div><div id="evidence-body"></div><div class="dialog-footer"><span>位置对应导入轨迹中的原始片段；不展示无关工具输出。</span><button class="button small" data-close="evidence-dialog">完成核对</button></div></dialog>
+  <dialog id="import-dialog" aria-labelledby="import-title"><div class="dialog-head"><div><div class="eyebrow">IMPORT A TRACE</div><h2 id="import-title">导入自己的执行轨迹</h2></div><button class="close-button" data-close="import-dialog" aria-label="关闭导入">×</button></div><p class="dialog-description">选择 ProDebugger 已导入的 <code>input.json</code>，并使用与你的任务相符的策略。原始 OTLP 请先通过项目的导入命令转换。每次请求最多 4 MB（包含轨迹、策略和案例名称），轨迹需包含 1–500 个规范化步骤。</p><form id="import-form"><label class="form-label" for="import-title-input">案例名称</label><input id="import-title-input" type="text" maxlength="150" placeholder="例如：读取报告任务的安全审计"><label class="form-label" for="import-file">轨迹文件（JSON）</label><input id="import-file" type="file" accept="application/json,.json" required><p class="small-note" id="import-file-info">只读取你选择的文件；提交后保存为一条独立案例。</p><label class="form-label" for="import-policy">这个任务的审计策略 JSON</label><textarea id="import-policy" rows="10" spellcheck="false" aria-describedby="import-feedback" required></textarea><p id="import-feedback" class="small-note" role="status"></p><div class="dialog-footer"><span>数据发送到当前本地服务。</span><button class="button primary" id="submit-import" type="submit">导入并审计</button></div></form></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><div class="error-banner">请启用 JavaScript，以读取本地服务生成的审计结果。</div></noscript>
+</body>
+</html>
