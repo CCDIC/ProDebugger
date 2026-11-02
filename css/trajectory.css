@@ -108,6 +108,26 @@
 .lane-links .link.is-preview { stroke-dasharray: 6 5; animation: link-flow 1s linear infinite; opacity: .8; }
 .lane-links .link.is-off { opacity: .3; }
 .lane-links .link-end { fill: var(--c, var(--amber)); }
+/* Selected-call links, weighted by the strongest verdict the call drew on the step. */
+.lane-links .link.v-viol { stroke: var(--bad-hi); stroke-width: 3.2; }
+.lane-links .link.v-unk { stroke: var(--amber); stroke-width: 2.2; }
+.lane-links .link.v-sat { stroke: var(--ok-line); stroke-width: 1.4; }
+.lane-links .link.v-sat:not(.is-preview) { stroke-dasharray: 3 4; }
+.lane-links .link.v-cand { stroke-width: 2.6; }
+.lane-links .link.v-read { stroke-width: 1.2; opacity: .45; }
+.lane-links .link-end.v-viol { fill: var(--bad-hi); } .lane-links .link-end.v-unk { fill: var(--amber); } .lane-links .link-end.v-sat { fill: var(--ok-line); }
+.lane-links .link-hit { fill: none; stroke: transparent; stroke-width: 12; pointer-events: stroke; cursor: help; }
+.lane-links .link-badge { pointer-events: auto; cursor: help; font: 500 11px var(--mono); }
+.lane-links .link-badge rect { fill: var(--panel); stroke: var(--c, var(--amber)); stroke-width: 1; }
+.lane-links .link-badge text { fill: var(--c, var(--amber)); }
+.lane-links .link-badge.v-viol rect { fill: var(--bad-bg); stroke: var(--bad-line); } .lane-links .link-badge.v-viol text { fill: var(--bad-ink); }
+.lane-links .link-badge.v-unk rect { fill: var(--warn-bg); stroke: var(--warn-line); } .lane-links .link-badge.v-unk text { fill: var(--warn-ink); }
+.lane-links .link-badge.v-sat rect { fill: var(--ok-bg); stroke: var(--ok-line); } .lane-links .link-badge.v-sat text { fill: var(--ok-ink); }
+.lane-links .link-bracket { pointer-events: auto; cursor: help; }
+.lane-links .link-bracket path { fill: none; stroke: var(--c, var(--amber)); stroke-width: 1.2; opacity: .6; }
+.lane-links .link-bracket-hit { fill: transparent; }
+.lane-links .link-bracket text { fill: var(--faint); font: 11px var(--mono); }
+.link-pop .pop-rules p { color: var(--text-2); }
 @keyframes link-flow { to { stroke-dashoffset: -22; } }
 
 @media (max-width: 1100px) { .step-detail { grid-template-columns: minmax(0, 1fr); } .st-card.is-open { grid-template-columns: minmax(0, 1fr); } .card-detail { border-left: 0; border-top: 1px solid var(--line); } }

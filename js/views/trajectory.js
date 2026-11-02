@@ -3,6 +3,7 @@
 // to the steps it touched.
 import {getJSON} from "../api.js?v=27bf1baa85";
 import {EVAL_CLASS, factChip, factText, icon} from "../case/format.js?v=27bf1baa85";
+import {callFindings, worstVerdict} from "../case/findings.js?v=917c5a06bc";
 import {actionLabel, ROLE_LABEL, stepRoles} from "../case/roles.js?v=27bf1baa85";
 import {esc, pretty, short} from "../util.js?v=27bf1baa85";
 import {callDetail, expandable, handoffHtml, layoutPhases, layoutProcess, overviewHtml, phaseDetail, processHtml, requestHtml} from "./process.js?v=27bf1baa85";
@@ -36,7 +37,8 @@ export function createView(root, ctx) {
       </section>
       <svg class="lane-links" id="tj-links" aria-hidden="true"></svg>
     </div>
-    <div class="arrow-pop" id="tj-arrow-pop" role="tooltip" hidden></div>`;
+    <div class="arrow-pop" id="tj-arrow-pop" role="tooltip" hidden></div>
+    <div class="arrow-pop link-pop" id="tj-link-pop" role="tooltip" hidden></div>`;
   const $ = id => root.querySelector("#" + id);
   const graph = $("tj-graph"), side = $("tj-side"), steps = $("tj-steps"), lanes = $("tj-lanes");
 
@@ -348,6 +350,46 @@ export function createView(root, ctx) {
     return {x: cx - base.left, top: r.top - base.top, bottom: Math.min(bottom, s.bottom) - base.top, off};
   }
 
+  // A selected call links to each step it concluded something about, the curve weighted and
+  // coloured by its strongest verdict and tagged with a badge where it lands; the steps it only
+  // read fold into one bracket per run of neighbours. Hovering a curve, badge or bracket opens
+  // what the call found there (linkPopHtml).
+  const findingsOf = c => callFindings(c, state.model.dsl?.factsById);
+  const curve = (a, y1, b, y2) => { const mid = (y1 + y2) / 2; return `M${a},${y1} C${a},${mid} ${b},${mid} ${b},${y2}`; };
+  const BADGE_CH = 6.6;
+
+  function linkHtml(c, t, a, b, verdict, cls, badge) {
+    const key = `${c.index}:${t}`, d = curve(a.x, a.bottom, b.x, b.top);
+    const list = findingsOf(c).get(t) || [];
+    const text = badge && list.length ? `${list[0].subject} ${list[0].word}${list.length > 1 ? ` +${list.length - 1}` : ""}` : "";
+    const w = text.length * BADGE_CH + 12;
+    // Badges sit in the gap above the agent lane, clear of its labels and step ticks.
+    const by = Math.min(b.top - 27, root.querySelector(".lane-steps").getBoundingClientRect().top - lanes.getBoundingClientRect().top - 24);
+    return `<path class="link v-${verdict} phase-${c.phase} ${cls}" d="${d}"/><circle class="link-end v-${verdict} phase-${c.phase}" cx="${b.x}" cy="${b.top}" r="3.5"/>
+      <path class="link-hit" data-link="${key}" d="${d}"/>
+      ${text ? `<g class="link-badge v-${verdict} phase-${c.phase}" data-link="${key}"><rect x="${b.x - w / 2}" y="${by}" width="${w}" height="18" rx="4"/><text x="${b.x}" y="${by + 12.5}" text-anchor="middle">${esc(text)}</text></g>` : ""}`;
+  }
+
+  // Consecutive read-only steps (in lane order) share one bracket over their cards.
+  function bracketHtml(c, run, a, base, cls) {
+    const s = steps.getBoundingClientRect();
+    const first = steps.querySelector(`[data-step="${run[0]}"]`)?.getBoundingClientRect(), last = steps.querySelector(`[data-step="${run.at(-1)}"]`)?.getBoundingClientRect();
+    if (!first || !last) return "";
+    // A run scrolled out of the lane keeps a faint curve to the edge it lies beyond.
+    if (last.right < s.left || first.left > s.right) {
+      const x = (last.right < s.left ? s.left + 8 : s.right - 8) - base.left;
+      return `<path class="link v-read phase-${c.phase} is-off ${cls}" d="${curve(a.x, a.bottom, x, first.top - base.top)}"/>`;
+    }
+    const x1 = Math.max(first.left + 10, s.left + 4) - base.left, x2 = Math.min(last.right - 10, s.right - 4) - base.left;
+    if (x2 <= x1) return "";
+    const y = Math.min(first.top, root.querySelector(".lane-steps").getBoundingClientRect().top) - base.top - 8, cx = (x1 + x2) / 2, key = `read:${c.index}:${run[0]}:${run.at(-1)}`;
+    const label = run.length > 1 ? `read S${String(run[0]).padStart(2, "0")}–S${String(run.at(-1)).padStart(2, "0")}` : `read S${String(run[0]).padStart(2, "0")}`;
+    const d = curve(a.x, a.bottom, cx, y);
+    return `<path class="link v-read phase-${c.phase} ${cls}" d="${d}"/><path class="link-hit" data-link="${key}" d="${d}"/>
+      <g class="link-bracket phase-${c.phase}" data-link="${key}"><path d="M${x1},${y + 6} V${y} H${x2} V${y + 6}"/><rect class="link-bracket-hit" x="${x1}" y="${y - 14}" width="${x2 - x1}" height="20"/>
+        <text x="${cx}" y="${y - 4}" text-anchor="middle">${label}</text></g>`;
+  }
+
   function drawLinks() {
     const svg = $("tj-links");
     const base = lanes.getBoundingClientRect();
@@ -355,7 +397,6 @@ export function createView(root, ctx) {
     root.querySelectorAll(".is-linked").forEach(el => el.classList.remove("is-linked"));
     const d = state.model?.debugger;
     if (!d) { svg.innerHTML = ""; return; }
-    const pairs = [];
     const current = state.sel ?? (state.selPhase ? "phase:" + state.selPhase : null);
     const key = state.hover ?? (state.hoverStep == null ? current : null);
     const stepT = key == null ? (state.hoverStep ?? state.selStep) : null;
@@ -366,23 +407,98 @@ export function createView(root, ctx) {
       svg.innerHTML = "";
       return;
     }
-    if (key != null) callOf(key)?.steps.forEach(t => pairs.push([callOf(key), t]));
-    else if (stepT != null) (state.idx.refs.get(stepT) || []).forEach(i => pairs.push([d.calls[i], stepT]));
-    const transient = state.hover != null || state.hoverStep != null;
-    // A call in a collapsed phase links from its phase card: one curve per card and step.
-    const seen = new Set();
-    svg.innerHTML = pairs.map(([c, t]) => {
-      const node = graph.querySelector(`.pnode[data-call="${c.index}"]`) || cardOf(c.phase), st = steps.querySelector(`[data-step="${t}"]`);
-      const id = `${node?.dataset.call ?? c.phase}:${t}`;
-      if (!node || !st || seen.has(id) || seen.size >= 80) return "";
-      seen.add(id);
-      node.classList.add("is-linked"); st.classList.add("is-linked");
-      const a = cardRect(node, graph, base), b = cardRect(st, steps, base);
-      if (a.off) return ""; // a node scrolled out of view would draw across the side panel
-      const y1 = a.bottom, y2 = b.top, mid = (y1 + y2) / 2;
-      return `<path class="link phase-${c.phase} ${b.off ? "is-off" : ""} ${transient ? "is-preview" : ""}" d="M${a.x},${y1} C${a.x},${mid} ${b.x},${mid} ${b.x},${y2}"/><circle class="link-end phase-${c.phase}" cx="${b.x}" cy="${y2}" r="3.5"/>`;
-    }).join("");
+    const cls = state.hover != null || state.hoverStep != null ? "is-preview" : "";
+    // A call in a collapsed phase links from its phase card.
+    const anchor = c => {
+      const node = graph.querySelector(`.pnode[data-call="${c.index}"]`) || cardOf(c.phase);
+      if (!node) return null;
+      node.classList.add("is-linked");
+      const a = cardRect(node, graph, base);
+      return a.off ? null : a; // a node scrolled out of view would draw across the side panel
+    };
+    const stepAt = t => {
+      const st = steps.querySelector(`[data-step="${t}"]`);
+      if (!st) return null;
+      st.classList.add("is-linked");
+      return cardRect(st, steps, base);
+    };
+    let html = "";
+    const call = key != null ? callOf(key) : null;
+    if (call) {
+      const a = anchor(call);
+      if (a) {
+        const found = findingsOf(call);
+        const touched = new Set([...call.steps, ...found.keys()]);
+        const lane = state.model.steps.map((s, i) => s.t ?? i + 1);
+        const runs = [];
+        lane.forEach((t, i) => {
+          if (!touched.has(t)) return;
+          if (found.has(t)) {
+            const b = stepAt(t);
+            if (b) html += linkHtml(call, t, a, b, worstVerdict(found.get(t)), `${cls} ${b.off ? "is-off" : ""}`, !b.off);
+            return;
+          }
+          stepAt(t);
+          if (runs.length && runs.at(-1).at(-1) === lane[i - 1]) runs.at(-1).push(t);
+          else runs.push([t]);
+        });
+        html += runs.map(run => bracketHtml(call, run, a, base, cls)).join("");
+      }
+    } else if (stepT != null) {
+      // Every call that touched one step: one curve per node, weighted by what it found there. A
+      // collapsed card's curve stands for the call in it that drew the strongest verdict.
+      const b = stepAt(stepT);
+      const best = new Map();
+      if (b) (state.idx.refs.get(stepT) || []).forEach(i => {
+        const c = d.calls[i], id = graph.querySelector(`.pnode[data-call="${c.index}"]`) ? c.index : c.phase;
+        const verdict = worstVerdict(findingsOf(c).get(stepT)), had = best.get(id);
+        if (!had ? best.size < 80 : worstVerdict([{verdict}, {verdict: had.verdict}]) !== had.verdict) best.set(id, {c, verdict});
+      });
+      best.forEach(({c, verdict}) => {
+        const a = anchor(c);
+        if (a) html += linkHtml(c, stepT, a, b, verdict, `${cls} ${b.off ? "is-off" : ""}`, false);
+      });
+    }
+    svg.innerHTML = html;
   }
+
+  // ---------- link popover ----------
+  const linkPop = $("tj-link-pop");
+  const VERDICT_CLASS = {viol: "bad", unk: "warn", sat: "ok", cand: "anchor", read: ""};
+
+  function linkPopHtml(key) {
+    const read = key.startsWith("read:");
+    const [ci, lo, hi] = (read ? key.slice(5) : key).split(":").map(Number);
+    const c = state.model?.debugger?.calls[ci];
+    if (!c) return "";
+    const tools = [...new Set(c.tools.map(t => t.name).filter(Boolean))].join(" · ") || "no tools";
+    const step = n => `S${String(n).padStart(2, "0")}`;
+    const head = `<div class="pop-head"><span class="mono">${esc(c.phase)} #${c.n} · ${esc(tools)}</span><span class="mono">→ ${read ? (lo === hi ? step(lo) : `${step(lo)}–${step(hi)}`) : step(lo)}</span></div>`;
+    if (read) return `${head}<p class="muted">Read only: this call drew no verdict on ${lo === hi ? "this step" : "these steps"}.</p>`;
+    const fact = fid => state.model.dsl?.factsById.get(fid);
+    const list = findingsOf(c).get(lo) || [];
+    if (!list.length) return `${head}<p class="muted">Read only: this call drew no verdict on this step.</p>`;
+    return `${head}<ol class="pop-rules">${list.map(f => {
+      const refs = f.cites.map(fact).filter(Boolean);
+      return `<li><div class="pop-rule"><span class="badge ${VERDICT_CLASS[f.verdict]}">${esc(f.word)}</span><span class="mono">${esc(f.subject || "")}</span></div>
+        ${f.reason ? `<p>${esc(short(String(f.reason), 260))}</p>` : ""}
+        ${refs.length ? `<div class="chip-col">${refs.slice(0, MAX_REFS).map(r => `<span class="fact-chip side-${esc(r.side)}"><span class="mono fid">f${r.fid}</span><span class="fact-text">${esc(short(factText(r), 70))}</span></span>`).join("")}${refs.length > MAX_REFS ? `<span class="muted">+${refs.length - MAX_REFS} more</span>` : ""}</div>` : ""}</li>`;
+    }).join("")}</ol>`;
+  }
+
+  function placeLinkPop(key, x, y) {
+    if (!key) { linkPop.hidden = true; linkPop.dataset.key = ""; return; }
+    if (linkPop.dataset.key !== key) { linkPop.innerHTML = linkPopHtml(key); linkPop.dataset.key = key; }
+    linkPop.hidden = !linkPop.innerHTML;
+    const w = linkPop.offsetWidth, h = linkPop.offsetHeight;
+    linkPop.style.left = `${Math.max(8, Math.min(innerWidth - w - 8, x + 14))}px`;
+    linkPop.style.top = `${y + 16 + h > innerHeight - 8 ? Math.max(8, y - h - 12) : y + 16}px`;
+  }
+  root.addEventListener("pointermove", event => {
+    const link = event.target.closest?.("[data-link]");
+    placeLinkPop(link?.dataset.link, event.clientX, event.clientY);
+  });
+
   let raf = 0;
   const scheduleLinks = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { drawLinks(); placePop(); }); };
 
@@ -490,7 +606,7 @@ export function createView(root, ctx) {
     if (hn !== state.hover || hs !== state.hoverStep) { state.hover = hn; state.hoverStep = hs; scheduleLinks(); }
   });
   lanes.addEventListener("pointerleave", () => { state.hover = state.hoverStep = null; scheduleLinks(); });
-  root.addEventListener("pointerleave", () => hoverArrow(null));
+  root.addEventListener("pointerleave", () => { hoverArrow(null); placeLinkPop(null); });
 
   root.addEventListener("keydown", event => {
     if (event.key === "Escape") {
