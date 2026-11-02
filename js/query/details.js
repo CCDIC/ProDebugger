@@ -2,8 +2,8 @@
 // this case, and behind its "more details" a popup (how it did it) and a rail (what came out).
 // Both name the same entities and steps; pointing at one lights it everywhere, on the tower too.
 import {esc} from "../util.js?v=27bf1baa85";
-import {SIGNAL_LABEL, SLOT_LABEL} from "./model.js?v=ad59c1cadf";
-import {agentWords, cap, faultText, goalText, question, statusText, stepList, VERDICT_WORD} from "./narrate.js?v=ad59c1cadf";
+import {SIGNAL_LABEL, SLOT_LABEL} from "./model.js?v=23f9bfd6b4";
+import {agentWords, cap, faultText, goalText, question, statusText, stepList, VERDICT_WORD} from "./narrate.js?v=23f9bfd6b4";
 
 const SLOT_ORDER = ["obs", "mem", "refl", "plan", "act", "chk"];
 // Who wrote a line: the environment, or the agent itself (memory, reflection, plan, action).
@@ -137,15 +137,12 @@ export function buildDetails(scene, model) {
   // PARSE: every step, the agent's text with its entities marked, and the facts it became.
   {
     const top = ranked.slice(0, 3);
-    // The steps the case turns on stay lit; the rest step back.
-    const key = new Set([...windowSteps.keys(), ...(root ? [root.step] : [])]);
-    const first = Math.min(...key);
     const rows = [];
     for (let t = 0; t <= steps; t++) {
       const cells = SLOT_ORDER.map(slot => [slot, cell(t, slot)]).filter(([, fs]) => fs.length);
       if (!cells.length) continue;
       const tag = t === root?.step ? `<i class="sd-tag is-root">root</i>` : windowSteps.has(t) ? `<i class="sd-tag">suspect window</i>` : "";
-      rows.push(`<li class="sd-step sd-card ${key.has(t) ? "is-key" : key.size ? "is-dim" : ""}" data-step="${t}"><h5>${t ? `Step ${t}` : "Task"}${tag}<span class="sd-modtabs">${cells.map(([slot, fs]) => `<button type="button" class="sd-modtab" data-mod="${slot}" data-slot-toggle="${slot}" aria-expanded="false" data-fids="${fids(fs.map(f => f.fid))}">${SLOT_LABEL[slot]}<em>${fs.length}</em></button>`).join("")}</span></h5>${cells.map(([slot, fs]) => {
+      rows.push(`<li class="sd-step sd-card" data-step="${t}"><h5>${t ? `Step ${t}` : "Task"}${tag}<span class="sd-modtabs">${cells.map(([slot, fs]) => `<button type="button" class="sd-modtab" data-mod="${slot}" data-slot-toggle="${slot}" aria-expanded="false" data-fids="${fids(fs.map(f => f.fid))}">${SLOT_LABEL[slot]}<em>${fs.length}</em></button>`).join("")}</span></h5>${cells.map(([slot, fs]) => {
         const calls = fs.slice(0, 4).map(f => `<code>#${f.fid} ${esc(factCall(f))}</code>`).join("") + (fs.length > 4 ? `<code class="sd-more">+${fs.length - 4}</code>` : "");
         return `<div class="sd-cellrow is-fold" data-mod="${slot}" data-slot="${slot}" data-src="${SOURCE[slot]}" data-fids="${fids(fs.map(f => f.fid))}" hidden><span class="sd-k sd-src">${SLOT_LABEL[slot]}</span><p>${mark(clip(cellText(fs), 260))}</p><div class="sd-calls"><span class="sd-arrow">→</span>${calls}</div></div>`;
       }).join("")}</li>`);
@@ -154,9 +151,8 @@ export function buildDetails(scene, model) {
     out.PARSE = {
       say: `ProDebugger compiles the agent's ${steps}-step log into a DSL record: ${scene.facts.length} facts, each saying who saw, thought or did what at which step, about ${top.map(e => ent(e.key)).join(", ")}${ranked.length > top.length ? ` and ${ranked.length - top.length} other entities` : ""}.`,
       title: "How each step became facts",
-      lead: `Each line of the log is read by a fixed template; the entities it names become nodes, and each statement becomes one fact.`,
-      body: `${key.size ? `<button class="sd-jump" data-goto="step:${first}">→ Step ${first}: ${first === root?.step ? "the root cause is here" : "the suspect window is here"}${first === root?.step && windowSteps.has(first) ? " (also the suspect window)" : ""}</button>` : ""}<ol class="sd-steps">${rows.join("")}</ol>`,
-      focus: key.size ? first : null,
+      body: `<ol class="sd-steps">${rows.join("")}</ol>`,
+      focus: null,
       rail: `<h4>DSL record</h4><dl class="sd-stats">${[["facts", scene.facts.length], ["entities", scene.entities.length], ["steps", steps]].map(([k, v]) => `<div><dd>${v}</dd><dt>${k}</dt></div>`).join("")}</dl>
         <h4>Facts by source</h4><ul class="sd-bars">${bySlot.map(([s, n]) => `<li data-src="${SOURCE[s]}"><span>${SLOT_LABEL[s]}</span><i style="--w:${(n / scene.facts.length * 100).toFixed(1)}%"></i><em>${n}</em></li>`).join("")}</ul>
         <h4>Entities <small>facts</small></h4><div class="sd-groups" data-fly>${[["goal", "the task asks for"], ["held", "the agent handled"], ["other", "the rest"]].map(([r, name]) => {

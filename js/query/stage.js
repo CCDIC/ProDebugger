@@ -1,8 +1,8 @@
 // Zero-dependency 3D stage for the cluster tower: a perspective orbit camera over a 2D canvas.
 // Flat square points, 1px lines and HUD brackets; the only motion is camera easing and points
 // moving to their place when a cloud appears, expands or folds.
-import {ballPoint, cloudRadius, PITCH, TIERS} from "./layout.js?v=ad59c1cadf";
-import {factLabel, factRoles, ROLE_ORDER} from "./clusters.js?v=ad59c1cadf";
+import {ballPoint, cloudRadius, PITCH, TIERS} from "./layout.js?v=23f9bfd6b4";
+import {factLabel, factRoles, ROLE_ORDER} from "./clusters.js?v=23f9bfd6b4";
 
 const TOKENS = ["void", "ink", "ink-hi", "ink-dim", "line", "line-hi", "focus", "label", "label-dim", "issue", "cand"];
 const PHASE_TOKENS = {PARSE: "parse", MAP: "map", ROUTE: "route", MANAGER: "manager", TRACE: "trace", SUBMIT: "submit"};

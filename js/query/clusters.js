@@ -2,8 +2,8 @@
 // debugger access (a ROUTE view, a suspect window, a TRACE lane's SQL result), plus the
 // candidate and root markers. A cloud expands into entity groups, a group into its facts.
 import {short} from "../util.js?v=27bf1baa85";
-import {SIGNAL_LABEL, SLOT_LABEL} from "./model.js?v=ad59c1cadf";
-import {agentWords, cap, factName, faultText, sayEnd, sayStop, START_SAY, statusText, VERDICT_WORD} from "./narrate.js?v=ad59c1cadf";
+import {SIGNAL_LABEL, SLOT_LABEL} from "./model.js?v=23f9bfd6b4";
+import {agentWords, cap, factName, faultText, sayEnd, sayStop, START_SAY, statusText, VERDICT_WORD} from "./narrate.js?v=23f9bfd6b4";
 
 const MAX_GROUPS = 12;
 

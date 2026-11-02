@@ -3,7 +3,7 @@
 // Every event says which DSL nodes it touched, so the renderer only has to light them.
 import {getJSON, JsonlFollower} from "../api.js?v=27bf1baa85";
 import {short} from "../util.js?v=27bf1baa85";
-import {cap, faultText, goalText, question, statusText, stepList, VERDICT_WORD} from "./narrate.js?v=ad59c1cadf";
+import {cap, faultText, goalText, question, statusText, stepList, VERDICT_WORD} from "./narrate.js?v=23f9bfd6b4";
 
 export const SLOTS = ["obs", "mem", "refl", "plan", "act", "chk"];
 export const SLOT_LABEL = {obs: "observation", mem: "memory", refl: "reflection", plan: "plan", act: "action", chk: "check"};
