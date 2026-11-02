@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="192" height="192" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">ProDebugger animated workflow icon</title>
+  <desc id="desc">A code cursor moves along the curved part of a P-shaped workflow, leaving a gold progress line between a solid start and an open end.</desc>
+  <style>
+    .progress { stroke-dasharray:100; stroke-dashoffset:100; animation:progress 6s linear infinite; }
+    @keyframes progress {
+      0% { stroke-dashoffset:100; opacity:1; }
+      80%, 90% { stroke-dashoffset:0; opacity:1; }
+      100% { stroke-dashoffset:0; opacity:0; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      .progress { animation:none; stroke-dashoffset:0; }
+      .code-cursor { display:none; }
+    }
+  </style>
+  <defs>
+    <path id="workflow" d="M24 26H46C61 26 70 33 70 45S61 64 46 64H24" pathLength="100"/>
+  </defs>
+  <rect x=".5" y=".5" width="95" height="95" rx="22" fill="#12191f" stroke="#29343d"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 26v52" stroke="#dce5e9" stroke-width="3.2"/>
+    <use xlink:href="#workflow" stroke="#86949e" stroke-width="3.2"/>
+    <use class="progress" xlink:href="#workflow" stroke="#e0b867" stroke-width="3.2"/>
+    <path d="m34 61-3 3 3 3" stroke="#dce5e9" stroke-width="1.7"/>
+  </g>
+  <g fill="#12191f" stroke="#e0b867" stroke-width="1.5">
+    <circle cx="46" cy="26" r="4.4"/>
+    <circle cx="70" cy="45" r="4.4"/>
+    <circle cx="46" cy="64" r="4.4"/>
+  </g>
+  <g fill="#e0b867">
+    <circle cx="46" cy="26" r="1.2"/>
+    <circle cx="70" cy="45" r="1.2"/>
+    <circle cx="46" cy="64" r="1.2"/>
+  </g>
+  <circle cx="24" cy="26" r="3.5" fill="#e0b867" stroke="#12191f" stroke-width="1.5"/>
+  <circle cx="24" cy="64" r="3.5" fill="#12191f" stroke="#dce5e9" stroke-width="1.8"/>
+  <g class="code-cursor">
+    <rect x="-8.5" y="-6" width="17" height="12" rx="3.5" fill="#12191f" stroke="#e0b867" stroke-width="1.25"/>
+    <path d="m-3.4-2.4-2.5 2.4 2.5 2.4m6.8-4.8L5.9 0 3.4 2.4M1.2-3l-2.4 6" fill="none" stroke="#edf1f3" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+    <animateMotion dur="6s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.8;0.9;1" keyPoints="0;1;1;1" rotate="0">
+      <mpath xlink:href="#workflow"/>
+    </animateMotion>
+    <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="1;1;0" keyTimes="0;0.9;1"/>
+  </g>
+</svg>

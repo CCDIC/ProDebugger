@@ -6,7 +6,7 @@ import {caseHref} from "../routes.js?v=27bf1baa85";
 import {domainIcon} from "./runs.js?v=27bf1baa85";
 import {esc, loader} from "../util.js?v=27bf1baa85";
 import {STATIC} from "../api.js?v=27bf1baa85";
-import {PROJECT} from "../site.js?v=a53d9f0cb7";
+import {PROJECT} from "../site.js?v=18001567c2";
 
 // The showcase case: a fully correct reference run kept under artifacts/.
 export const DEMO_REF = ["runs", "dsl-route-causal-timeline-high-unlimited-alf18-20261007-live", "GPT-4o_018_alfworld_task_018"];
@@ -14,47 +14,45 @@ export const DEMO_REF = ["runs", "dsl-route-causal-timeline-high-unlimited-alf18
 const icon = paths => `<svg class="h-icon" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
 const ARROW = icon('<path d="M5 12h14M13 6l6 6-6 6"/>');
 
+const CAPABILITY_ICONS = {
+  logs: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/>',
+  dsl: '<path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/>',
+  checks: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m7 12 3 3 7-7"/>',
+  tracing: '<circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 5h8a4 4 0 0 1 0 8H9a3 3 0 0 0 0 6h8"/>',
+};
+
 const HERO_CAPABILITIES = [
-  ["Structured Agent Logs", "Turn raw logs into linked facts, entities, and task requirements.", '<rect x="4" y="3" width="12" height="17" rx="2"/><path d="M8 7h4M8 11h4M16 15h4M18 13v4"/>'],
-  ["Locate Suspected Errors", "Identify which step and agent component may be wrong.", '<path d="M3 4h18l-7 8v7l-4 2v-9z"/>'],
-  ["Trace Errors Across Steps", "Investigate where a suspected error began and how it developed.", '<circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h5a4 4 0 0 1 0 8h-1a4 4 0 0 0 0 4h6"/>'],
-  ["Explain the Diagnosis", "Show why one candidate was selected, with source evidence.", '<path d="M12 3v18M4 7h5M15 7h5M4 12h5M15 12h5M4 17h5M15 17h5"/>'],
+  ["Structured Log Representation", CAPABILITY_ICONS.logs],
+  ["Interactive DSL Queries", CAPABILITY_ICONS.dsl],
+  ["Programmatic Checks", CAPABILITY_ICONS.checks],
+  ["Workflow-Driven Tracing", CAPABILITY_ICONS.tracing],
 ];
 
 const CLOUD_CASE_HREF = "#/query/evidence-query-claims-n30-20261013/GPT-4o_024_alfworld_task_024";
 
 function heroCapabilities() {
-  return `<div class="hero-capabilities" aria-label="Core capabilities">
-    ${HERO_CAPABILITIES.map(([title, text, paths], i) => `<article class="hero-capability"><span class="hero-capability-icon" aria-hidden="true">${icon(paths)}</span><div><span class="hero-capability-num" aria-hidden="true">0${i + 1}</span><h2>${title}</h2><p>${text}</p></div></article>`).join("")}
-  </div>`;
+  return `<ul class="hero-capabilities" aria-label="Core capabilities">
+    ${HERO_CAPABILITIES.map(([title, paths]) => `<li class="hero-capability">${icon(paths)}<span>${title}</span></li>`).join("")}
+  </ul>`;
 }
 
-function openClawApplication() {
-  return `<a class="hero-openclaw" href="./openclaw/index.html" aria-label="OpenClaw privacy case study">
-    <span class="hero-openclaw-mark" aria-hidden="true">${icon('<path d="M8 5 4 9l4 4M16 5l4 4-4 4M9 19h6M12 13v6"/>')}</span>
-    <div><div class="hero-openclaw-heading"><strong>OpenClaw in the real world</strong><span>Case study</span></div><p>Where did the ID number come from? A privacy investigation of an OpenClaw agent.</p></div>
-  </a>`;
-}
-
-// Closing section: where the same queryable trajectory leads. Each scene is a use case, a
-// one-line pitch and the kind of query it runs.
-const SCENES = [
-  ["rsi", "RSI", "Recursive self-improvement",
-   "Agents that read their own failures. Each verified root cause becomes the signal the next version learns from, without a person reading every log.",
-   ["submit", "(run)", "root cause", "patch skill"]],
-  ["gov", "Governance", "Accountable autonomy",
-   "Every step checked against the rules an organisation sets, with the quoted log line as proof when one is broken.",
-   ["check", "(step, policy)", "violation", "step 14"]],
-  ["privacy", "Privacy", "Data you can follow",
-   "Private data followed from where it entered the agent to where it left, through every tool call in between.",
-   ["trace", "(passport.pdf)", "left via", "email"]],
+// Prospective research directions, distinct from the demonstrated workbench capabilities.
+const RESEARCH_DIRECTIONS = [
+  ["rsi", "Recursive Self-Improvement (RSI)", '<path d="M20 7a8 8 0 0 0-14-2L3 8M3 3v5h5M4 17a8 8 0 0 0 14 2l3-3M21 21v-5h-5"/>',
+   ["Failure-driven refinement", "Skill evolution", "Closed-loop evaluation"]],
+  ["gov", "Agent Governance", '<path d="m12 3-7 3v6c0 4 3 7 7 9 4-2 7-5 7-9V6z"/><path d="m9 12 2 2 4-4"/>',
+   ["Policy compliance", "Decision accountability", "Auditable evidence"]],
+  ["serving", "Efficient Serving", '<path d="m13 2-9 12h7l-1 8L21 9h-8z"/>',
+   ["Selective evidence retrieval", "Budget-aware orchestration", "Lower-latency diagnosis"]],
+  ["privacy", "Privacy Preservation", '<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>',
+   ["Sensitive-data tracing", "Disclosure detection", "Privacy-aware diagnosis"]],
 ];
 
-const STAGES = [
-  ["map", "MAP", "Map the goal", "Builds a goal map from task requirements, retaining unresolved parsing as evidence gaps.", "Goal map"],
-  ["route", "ROUTE", "Route to suspects", "Reads the full action–feedback timeline and the original modules, tests parser gaps as rival explanations, and declares a few evidence-backed anchor cases.", "Anchor cases"],
-  ["trace", "TRACE", "Trace the evidence", "A manager allocates investigations. Each investigator makes one targeted query across the trajectory and reports a step-level candidate with source evidence.", "Evidence-backed candidates"],
-  ["submit", "SUBMIT", "Submit the verdict", "Compares TRACE candidates using supplied evidence and selects one existing candidate with an uncertainty explanation. If TRACE supplies no candidate, SUBMIT is skipped.", "Selected hypothesis"],
+const MECHANISMS = [
+  ["logs", "Log Representation", ["Entity-level facts", "Symbolic predicates", "Source-linked evidence"]],
+  ["dsl", "Interactive DSL Queries", ["Read-only queries", "Cross-step retrieval", "Evidence provenance"]],
+  ["checks", "Programmatic Checks", ["Claim consistency", "Action applicability", "Task completion"]],
+  ["tracing", "Workflow-Driven Tracing", ["Hypothesis generation", "Targeted investigation", "Candidate comparison"]],
 ];
 
 // Project-site links (static export only): paper, code and a video that plays in a dialog.
@@ -233,42 +231,39 @@ export function mountHome(root) {
       <section class="home-hero">
         <div class="hero-copy" data-reveal-group>
           <div class="hero-eyebrow"><span></span> Evidence-grounded agent debugging</div>
-          <h1 class="hero-title">Pro<em>Debugger</em></h1>
+          <h1 class="hero-title"><img class="hero-title-mark" src="./img/prodebugger-mark-animated.svg" width="96" height="96" alt="" aria-hidden="true"><span class="hero-title-word">Pro<em>Debugger</em></span></h1>
           <p class="hero-subtitle">Evidence-Grounded Debugging of LLM Agent Trajectories</p>
           <p class="hero-sub">Investigate why an agent failed. Inspect candidate explanations and the recorded evidence behind them.</p>
           ${STATIC ? projectLinks() : ""}
           ${heroCapabilities()}
           <div class="hero-ctas">
-            <a class="h-btn primary" href="${CLOUD_CASE_HREF}">Explore the trajectory ${ARROW}</a>
-            <a class="h-btn hero-openclaw-cta" href="./openclaw/index.html">OpenClaw case ${ARROW}</a>
+            <a class="h-btn primary" href="${CLOUD_CASE_HREF}">Explore ProDebugger ${ARROW}</a>
+            <a class="h-btn hero-openclaw-cta" href="./openclaw/index.html">A case from OpenClaw ${ARROW}</a>
           </div>
         </div>
-        <div class="hero-visual" data-reveal><div class="hero-preview-label"><span>INSIDE AN INVESTIGATION</span><span class="hero-preview-status"><i></i> Interactive preview</span></div>${heroShots()}${openClawApplication()}</div>
+        <div class="hero-visual" data-reveal>${heroShots()}</div>
         <button type="button" class="hero-scroll" data-scroll="how" aria-label="Scroll down">${icon('<path d="m6 9 6 6 6-6"/>')}</button>
       </section>
 
       <section class="home-section alt" id="how">
-        <div class="section-head" data-reveal>
-          <div class="h-eyebrow">How it works</div>
-          <h2 class="section-title">Four stages, one verified verdict.</h2>
-          <p class="section-lede">Each stage runs in its own isolated model context and hands a structured result to the next, so every conclusion can be traced back to the source.</p>
+        <div class="section-head how-heading" data-reveal>
+          <h2 class="section-title">How it works</h2>
+          <button type="button" class="how-diagram" data-open-diagram>Technical diagram ${ARROW}</button>
         </div>
-        <ol class="stage-row" data-reveal-group>
-          ${STAGES.map(([id, name, title, text, output], i) => `<li class="stage stage-${id}">
-            <div class="stage-top"><span class="stage-num">0${i + 1}</span><span class="stage-name">${name}</span></div>
-            <h3>${title}</h3><p>${text}</p>
-            <div class="stage-out"><span>Output</span>${output}</div></li>`).join("")}
+        <ol class="stage-row" aria-label="Technical mechanisms" data-reveal-group>
+          ${MECHANISMS.map(([id, title, points], i) => `<li class="stage">
+            <div class="stage-heading">${icon(CAPABILITY_ICONS[id])}<span class="stage-num" aria-hidden="true">0${i + 1}</span></div>
+            <h3>${title}</h3>
+            <ul class="stage-points">${points.map(point => `<li>${point}</li>`).join("")}</ul>
+          </li>`).join("")}
         </ol>
-        <div class="how-more" data-reveal>
-          <button type="button" class="h-btn" data-open-diagram>${icon('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>')}View the technical diagram</button>
-        </div>
       </section>
 
       <section class="home-section" id="demo">
         <div class="section-head" data-reveal>
           <div class="h-eyebrow">Product</div>
           <h2 class="section-title">See it on a real case.</h2>
-          <p class="section-lede">A household agent failed its task. Explore the diagnosis the way an engineer would: the trajectory beside the debugger's decisions, the compiled facts, and the final verdict.</p>
+          <p class="section-lede">Inspect an agent failure through its trajectory, evidence graph, and diagnosis.</p>
         </div>
         <div class="demo-window" data-reveal>
           <div class="demo-bar">
@@ -290,15 +285,14 @@ export function mountHome(root) {
         </svg>
         <div class="finale-inner">
           <div class="section-head" data-reveal>
-            <div class="h-eyebrow">Beyond this demo</div>
-            <h2 class="section-title">Every agent leaves a trail.<br><em>Make it accountable.</em></h2>
-            <p class="section-lede">Once a trajectory can be queried, the same evidence serves more than debugging.</p>
+            <div class="h-eyebrow">Ongoing research</div>
+            <h2 class="section-title">Research Frontiers in<br>Agent Debugging</h2>
           </div>
           <div class="scene-grid" data-reveal-group>
-            ${SCENES.map(([id, tag, title, text, [fn, arg, verb, hit]], i) => `<article class="scene scene-${id}">
-              <div class="scene-top"><span class="scene-num">0${i + 1}</span><span class="scene-tag">${tag}</span></div>
-              <h3>${title}</h3><p>${text}</p>
-              <code class="scene-query"><b>${fn}</b>${esc(arg)} <i>→</i> ${verb} <mark>${hit}</mark></code></article>`).join("")}
+            ${RESEARCH_DIRECTIONS.map(([id, title, paths, points]) => `<article class="scene scene-${id}">
+              <div class="scene-heading">${icon(paths)}<h3>${title}</h3></div>
+              <ul class="scene-points">${points.map(point => `<li>${point}</li>`).join("")}</ul>
+            </article>`).join("")}
           </div>
           <div class="finale-bottom">
             <div class="related" data-reveal>
@@ -313,12 +307,11 @@ export function mountHome(root) {
               </ul>
             </div>
             <div class="qr-card" data-reveal>
-              <div class="qr-frame"><img src="./img/qr-project.svg" alt="QR code linking to ${esc(PROJECT.url)}" width="168" height="168"></div>
+              <a class="qr-frame" href="${esc(PROJECT.paper)}" target="_blank" rel="noopener" aria-label="Read the ProDebugger paper"><img src="./img/qr-paper.svg" alt="QR code linking to the ProDebugger paper" width="168" height="168"></a>
               <div class="qr-copy">
-                <span class="h-eyebrow">Scan to visit</span>
-                <strong>Take ProDebugger with you.</strong>
-                <a class="qr-url" href="${esc(PROJECT.url)}">${esc(PROJECT.url.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>
-                ${STATIC ? projectLinks() : ""}
+                <span class="h-eyebrow">Scan to read</span>
+                <strong>The ProDebugger paper</strong>
+                <p class="qr-contact">Contact: <a href="mailto:haiyan_yin@a-star.edu.sg">haiyan_yin@a-star.edu.sg</a></p>
               </div>
             </div>
           </div>
