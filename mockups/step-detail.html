@@ -10,524 +10,384 @@
     document.documentElement.dataset.theme = c === "light" || c === "dark" ? c : matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   })();
 </script>
+<!-- The real page's stylesheets: every card, block, badge and chip below uses its classes. -->
 <link rel="stylesheet" href="../css/theme.css">
+<link rel="stylesheet" href="../css/runs.css">
+<link rel="stylesheet" href="../css/workbench.css">
+<link rel="stylesheet" href="../css/trajectory.css">
 <style>
-/* Mockup-only tokens. The tour's --qg-th-* source colours exist only in the dark palette,
-   so both themes get their own env / agent / violation / pass colours here. */
-:root {
-  --src-env: #5cc3b6; --src-agent: #e49a7a; --viol: #ef6b5e; --undec: #c9a24a; --pass: #8cc49a;
-  --on-solid: #06080b;
-}
-:root[data-theme="light"] {
-  --src-env: #1f8a7e; --src-agent: #b8582e; --viol: #c2382d; --undec: #9a6d0c; --pass: #2f7a45;
-  --on-solid: #fff;
-}
+/* ---------- page chrome for the mockup only ---------- */
 body { padding: 0 16px 6rem; }
-.page { max-width: 92rem; margin: 0 auto; }
-.top { display: flex; align-items: center; gap: 1rem; padding: 1.4rem 0 .4rem; }
-.top h1 { margin: 0; font-size: 1.45rem; font-weight: 600; }
-.top .mono { color: var(--muted); font-size: .8rem; }
-.top button { margin-left: auto; padding: .35rem .8rem; border: 1px solid var(--line-strong); border-radius: .5rem; background: var(--surface-2); cursor: pointer; font-size: .85rem; }
-.intro { max-width: 62rem; color: var(--text-2); }
-.intro li { margin: .2rem 0; }
-.toc { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 0; }
-.toc a { padding: .25rem .7rem; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--text); text-decoration: none; font-size: .85rem; }
-.toc a:hover { border-color: var(--accent-line); }
-.toc a.rec { border-color: var(--accent-line); background: var(--active-soft); color: var(--active-ink); }
+.mk-page { max-width: 98rem; margin: 0 auto; padding-top: 1.4rem; }
+.mk-theme { margin-left: auto; cursor: pointer; }
+.mk-intro { max-width: 64rem; margin: .8rem 0 0; color: var(--text-2); font-size: .92rem; }
+.mk-intro li { margin: .15rem 0; }
+.mk-toc { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .8rem; }
+.mk-toc a { text-decoration: none; }
+.mk-sec { margin-top: 2.6rem; }
+.mk-sec > .traj-head { margin-bottom: .6rem; }
+.mk-sec h2 { margin: .1rem 0 0; font-size: 1.25rem; font-weight: 600; }
+.mk-notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: .25rem 2rem; margin: 0 0 .9rem; font-size: .88rem; color: var(--text-2); }
+.mk-notes p { margin: 0; }
+.mk-notes b { color: var(--text); }
+.mk-pro::before { content: "+ "; color: var(--ok-ink); font-weight: 700; }
+.mk-con::before { content: "− "; color: var(--bad-ink); font-weight: 700; }
+/* The real open card sizes itself from the lane's container width and caps its height;
+   here it simply fills the lane and shows everything. */
+.mk-lane .st-card.is-open { width: 100%; }
+.mk-lane .card-detail { max-height: none; overflow: visible; }
+.mk-lane .lane-track { width: 100%; }
 
-section.opt { margin-top: 3rem; }
-.opt-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line-strong); }
-.opt-head h2 { margin: 0; font-size: 1.2rem; font-weight: 600; }
-.opt-head .tag { padding: .05rem .5rem; border: 1px solid var(--line-strong); font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; color: var(--muted); }
-.opt-head .tag.rec { border-color: var(--accent); background: var(--accent); color: var(--on-accent); font-weight: 600; }
-.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .3rem 2rem; margin: .7rem 0 1rem; font-size: .9rem; color: var(--text-2); }
-.notes p { margin: 0; }
-.notes b { color: var(--text); }
-.pros::before { content: "+ "; color: var(--pass); font-weight: 700; }
-.cons::before { content: "− "; color: var(--viol); font-weight: 700; }
-
-/* ---------- the step card frame (mirrors .st-card.is-open) ---------- */
-.card { display: grid; grid-template-columns: 11rem minmax(0, 1fr); border: 1px solid var(--accent-line); border-radius: .9rem; background: var(--panel-2); box-shadow: 0 10px 24px #0000001f; overflow: hidden; }
-.card.is-viol { border-bottom: 3px solid var(--viol); }
-.meta { padding: .8rem .85rem; border-right: 1px solid var(--line); }
-.meta .idx { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
-.meta h3 { margin: .5rem 0 .25rem; font-family: var(--mono); font-size: .98rem; font-weight: 600; overflow-wrap: anywhere; }
-.meta p { margin: 0 0 .6rem; font-size: .8rem; color: var(--muted); }
-.pill { display: inline-flex; align-items: center; gap: .25rem; margin: 0 .2rem .3rem 0; padding: .05rem .45rem; border: 1px solid var(--line-strong); border-radius: .35rem; font-size: .74rem; font-weight: 600; color: var(--muted); }
-.pill.viol { border-color: var(--viol); background: color-mix(in srgb, var(--viol) 14%, transparent); color: var(--viol); }
-.pill.undec { border-color: color-mix(in srgb, var(--undec) 60%, transparent); color: var(--undec); }
-.body { min-width: 0; padding: .9rem 1rem 1rem; }
-
-/* ---------- vocabulary borrowed from the Query Graph tour details ---------- */
-.k { font-family: var(--mono); font-size: .74rem; color: var(--muted); }
-.stepno { font-family: var(--mono); font-weight: 600; color: var(--accent); }
-.h { display: flex; align-items: center; gap: .55rem; margin: 0 0 .5rem; padding-bottom: .3rem; border-bottom: 1px solid var(--line); }
-.h > b { display: grid; place-items: center; min-width: 1.35rem; height: 1.35rem; background: var(--accent); color: var(--on-accent); font-family: var(--mono); font-size: .78rem; }
-.h > span { font-family: var(--mono); font-size: .82rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
-.h > em { margin-left: auto; padding: 0 .45rem; border: 1px solid var(--line-strong); font-family: var(--mono); font-size: .72rem; font-style: normal; color: var(--muted); }
-.h.is-viol > b { background: var(--viol); color: var(--on-solid); }
-.sec + .sec { margin-top: 1.1rem; }
-
-/* Highlighted span inside the raw text: what the rule is about. */
-mark.hl { padding: 0 .1rem; background: color-mix(in srgb, var(--viol) 22%, transparent); color: inherit; border-bottom: 2px solid var(--viol); }
-mark.hl.env { background: color-mix(in srgb, var(--src-env) 22%, transparent); border-bottom-color: var(--src-env); }
-mark.hl.soft { background: color-mix(in srgb, var(--accent) 22%, transparent); border-bottom-color: var(--accent); }
-
-/* Verdict box (≈ .sd-verdict) */
-.verdict { padding: .6rem .8rem .55rem; border: 1px solid color-mix(in srgb, var(--viol) 55%, transparent); border-left: 3px solid var(--viol); background: color-mix(in srgb, var(--viol) 6%, transparent); }
-.verdict + .verdict { margin-top: .6rem; }
-.v-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .6rem; }
-.v-tag { padding: 0 .45rem; background: var(--viol); color: var(--on-solid); font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .08em; }
-.v-head > b { font-size: 1.02rem; font-weight: 600; color: var(--viol); }
-.v-head > .where { margin-left: auto; padding: 0 .45rem; border: 1px solid var(--line-strong); font-family: var(--mono); font-size: .72rem; color: var(--muted); }
-.v-say { margin: .4rem 0 .2rem; color: var(--text-hi); }
-.v-caveat { margin: .3rem 0 0; font-size: .84rem; color: var(--muted); }
-.v-caveat::before { content: "note · "; font-family: var(--mono); font-size: .72rem; }
-
-/* Quote cards (≈ .sd-quote-card) */
-.quote { margin: .4rem 0 0; padding: .35rem .6rem; border-left: 3px solid var(--src); background: color-mix(in srgb, var(--src) 8%, transparent); font-family: var(--mono); font-size: .88rem; overflow-wrap: anywhere; }
-.quote .k { display: block; color: var(--src); font-family: var(--mono); }
-.quote[data-src="agent"] { --src: var(--src-agent); }
-.quote[data-src="env"] { --src: var(--src-env); }
-.quote[data-src="ok"] { --src: var(--pass); }
-.quotes2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-.quotes2 .quote { margin: .4rem 0 0; }
-
-/* "full text" / technical folds (≈ .sd-full) */
-details.full { margin-top: .35rem; }
-details.full > summary { display: inline; font-family: var(--mono); font-size: .72rem; color: var(--muted); cursor: pointer; text-decoration: underline dotted; }
-details.full[open] { padding: .3rem .5rem; border-left: 1px solid var(--line-strong); background: var(--tint-hover); }
-details.full dl { display: grid; grid-template-columns: max-content 1fr; gap: .1rem .8rem; margin: .35rem 0 .1rem; font-size: .8rem; }
-details.full dt { font-family: var(--mono); color: var(--muted); }
-details.full dd { margin: 0; font-family: var(--mono); overflow-wrap: anywhere; }
-.fid { padding: 0 .3rem; border: 1px solid var(--line-strong); border-radius: .25rem; font-family: var(--mono); font-size: .74rem; }
-
-/* Action hero: the one field that stays open */
-.act { padding: .55rem .75rem .6rem; border: 1px solid var(--line-strong); border-left: 3px solid var(--src-agent); border-radius: .2rem; background: var(--surface-2); }
-.act.is-viol { border-color: color-mix(in srgb, var(--viol) 55%, transparent); border-left-color: var(--viol); }
-.act-top { display: flex; align-items: center; gap: .5rem; }
-.act-top .lab { font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .1em; color: var(--src-agent); }
-.act-top .flag { margin-left: auto; }
-.act-cmd { margin: .3rem 0 0; font-family: var(--mono); font-size: 1.15rem; font-weight: 500; color: var(--text-hi); overflow-wrap: anywhere; }
-.act-why { margin: .25rem 0 0; font-size: .86rem; color: var(--muted); }
-
-/* Folded fields: one line each, label + preview of the field's last line */
-details.fold { border: 1px solid var(--line); border-left: 3px solid var(--src, var(--line-strong)); border-radius: .2rem; background: var(--surface-2); }
-details.fold + details.fold { margin-top: .3rem; }
-details.fold[data-src="env"] { --src: var(--src-env); }
-details.fold[data-src="mind"] { --src: color-mix(in srgb, var(--info-line) 80%, transparent); }
-details.fold > summary { display: grid; grid-template-columns: 1rem 6.6rem minmax(0, 1fr) auto; align-items: center; gap: .5rem; padding: .32rem .6rem; cursor: pointer; list-style: none; }
+/* ---------- proposed additions, written in the page's own idiom ---------- */
+/* 1. A folded field: same detail-block and tone, its h4 row becomes the summary and
+      carries a one-line preview (the field's last line, as the collapsed card subtitle does). */
+details.fold { padding: .45rem .7rem; }
+details.fold > summary { display: flex; align-items: center; gap: .55rem; list-style: none; }
 details.fold > summary::-webkit-details-marker { display: none; }
-details.fold > summary::before { content: "▸"; color: var(--muted); font-size: .75rem; transition: transform .15s; }
+details.fold > summary::before { content: "▸"; flex: none; font-size: .7rem; opacity: .65; transition: transform .15s; }
 details.fold[open] > summary::before { transform: rotate(90deg); }
-details.fold > summary:hover { background: var(--tint-hover); }
-.f-lab { font-size: .84rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.f-lab small { display: block; font-family: var(--mono); font-size: .64rem; font-weight: 500; letter-spacing: .08em; color: var(--src); text-transform: uppercase; }
-.f-prev { min-width: 0; overflow: hidden; color: var(--muted); font-size: .84rem; white-space: nowrap; text-overflow: ellipsis; }
-.f-prev.is-hot { color: var(--text); }
-.f-meta { font-family: var(--mono); font-size: .7rem; color: var(--faint); white-space: nowrap; }
-.f-meta.viol { color: var(--viol); font-weight: 600; }
-details.fold[open] > summary .f-prev { visibility: hidden; }
-.f-body { margin: 0 .6rem .55rem 2.1rem; padding: .45rem .55rem; border-radius: .3rem; background: var(--tint); white-space: pre-wrap; overflow-wrap: anywhere; font-size: .84rem; line-height: 1.5; max-height: 12rem; overflow: auto; }
-.group-k { margin: .7rem 0 .3rem; }
+details.fold > summary .fold-name { flex: none; }
+details.fold > summary .fold-prev { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 400; opacity: .78; }
+details.fold[open] > summary .fold-prev { visibility: hidden; }
+details.fold > summary .role-tag { flex: none; margin-left: auto; }
+details.fold > summary .badge { flex: none; font-size: .68rem; padding: 0 .4rem; }
+details.fold > .text-box { margin-top: .45rem; }
+.fold-stack { display: flex; flex-direction: column; gap: .35rem; }
 
-/* Option A */
-.a-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 1rem; margin-top: 1rem; }
-.a-viols { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
-.a-viols .verdict + .verdict { margin-top: 0; }
-.undec-line { margin-top: .5rem; }
+/* 2. The action stays open and reads first. */
+.role-action.is-key .text-box { font-size: 1rem; font-weight: 600; color: var(--text-hi); cursor: auto; }
+.detail-block.has-problem { border-color: var(--bad-line); box-shadow: inset 3px 0 0 var(--bad-line); }
+.detail-block.has-problem h4 .badge { margin-left: auto; }
 
-/* Option B: story rail */
-.b-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 17rem; gap: 1.2rem; }
-.story { position: relative; margin: 0; padding: 0; list-style: none; }
-.story > li { position: relative; display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); gap: .7rem; padding-bottom: .9rem; }
-.story > li::before { content: ""; position: absolute; left: 2.3rem; top: 1.6rem; bottom: 0; border-left: 1px dashed var(--line-strong); }
-.story > li:last-child::before { display: none; }
-.beat { position: relative; z-index: 1; align-self: start; padding: .15rem 0; border: 1px solid var(--src, var(--line-strong)); background: var(--panel-2); color: var(--src, var(--muted)); font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-align: center; }
-.beat[data-src="env"] { --src: var(--src-env); }
-.beat[data-src="agent"] { --src: var(--src-agent); }
-.beat[data-src="mind"] { --src: var(--info-line); }
-.beat small { display: block; font-size: .62rem; font-weight: 500; letter-spacing: .04em; color: var(--muted); }
-.callout { position: relative; margin-top: .5rem; }
-.callout::before { content: ""; position: absolute; left: 1.2rem; top: -.5rem; width: .7rem; height: .7rem; border-left: 1px solid color-mix(in srgb, var(--viol) 55%, transparent); border-top: 1px solid color-mix(in srgb, var(--viol) 55%, transparent); background: color-mix(in srgb, var(--viol) 6%, var(--panel-2)); transform: rotate(45deg); }
-.rail { padding-left: 1rem; border-left: 1px solid var(--line); }
-.rail h4 { margin: 0 0 .4rem; font-family: var(--mono); font-size: .74rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.rail h4:not(:first-child) { margin-top: 1rem; }
-.tally { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; }
-.tally div { padding: .3rem .2rem; border: 1px solid var(--line-strong); text-align: center; }
-.tally b { display: block; font-family: var(--mono); font-size: 1.2rem; }
-.tally span { font-size: .72rem; color: var(--muted); }
-.tally .viol { border-color: var(--viol); background: color-mix(in srgb, var(--viol) 10%, transparent); }
-.tally .viol b { color: var(--viol); }
-.tally .undec b { color: var(--undec); }
-.tally .pass b { color: var(--pass); }
-.jump { display: block; width: 100%; margin-top: .3rem; padding: .3rem .5rem; border: 1px solid var(--line-strong); background: transparent; text-align: left; font-size: .84rem; cursor: pointer; }
-.jump:hover { border-color: var(--viol); }
-.jump .dot { display: inline-block; width: .55rem; height: .55rem; margin-right: .4rem; background: var(--viol); }
-.jump.undec .dot { background: var(--undec); }
+/* 3. The exact text a rule cites (each fact keeps its source span), marked in place. */
+mark.hit { padding: 0 .15rem; border-radius: .2rem; background: color-mix(in srgb, var(--bad-line) 28%, transparent); box-shadow: inset 0 -2px 0 var(--bad-line); color: inherit; }
+mark.hit.env { background: color-mix(in srgb, var(--teal-line) 30%, transparent); box-shadow: inset 0 -2px 0 var(--teal-line); }
+mark.hit.ok { background: color-mix(in srgb, var(--ok-line) 28%, transparent); box-shadow: inset 0 -2px 0 var(--ok-line); }
 
-/* Option C: checklist */
-.c-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 1.2rem; }
-.qas { margin: 0; padding: 0; list-style: none; }
-.qa { padding: .5rem .7rem .55rem; border: 1px solid var(--line); border-left: 3px solid var(--v); }
-.qa + .qa { margin-top: .45rem; }
-.qa[data-v="no"] { --v: var(--viol); background: color-mix(in srgb, var(--viol) 5%, transparent); }
-.qa[data-v="unk"] { --v: var(--undec); }
-.qa[data-v="yes"] { --v: var(--pass); }
-.qa.is-active { box-shadow: 0 0 0 1px var(--v); }
-.qa-q { display: grid; grid-template-columns: 5.4rem minmax(0, 1fr); gap: .7rem; align-items: baseline; }
-.qa-verdict { padding: .05rem 0; background: var(--v); color: var(--on-solid); font-family: var(--mono); font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-align: center; }
-.qa[data-v="unk"] .qa-verdict { background: transparent; border: 1px solid var(--v); color: var(--v); }
-.qa-q p { margin: 0; font-weight: 600; }
-.qa-a { margin: .3rem 0 0 6.1rem; font-size: .9rem; }
-.qa-a p { margin: .2rem 0; }
-.qa-more { margin: .4rem 0 0 6.1rem; }
-.hover-note { margin: .6rem 0 0; font-size: .8rem; color: var(--muted); }
-.hover-note::before { content: "交互 · "; font-family: var(--mono); color: var(--accent); }
+/* 4. A violation in words, built like the TRACE candidate card. */
+.violation h4 strong { font-size: .9rem; }
+.violation .evi { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin: .45rem 0 .2rem; }
+.violation .evi blockquote { margin: 0; font-style: normal; font-family: var(--mono); font-size: .82rem; overflow-wrap: anywhere; }
+.violation .evi .eyebrow { display: block; margin-bottom: .1rem; font-size: .62rem; font-style: normal; color: inherit; opacity: .75; }
+.violation .evi blockquote.env { border-left-color: var(--teal-line); }
+.violation .evi blockquote.ok { border-left-color: var(--ok-line); }
+.violation .note { font-size: .8rem; opacity: .8; }
+.violation details .eval-row { border-top: 0; }
+/* attached under the field it is about (option C) */
+.attached { position: relative; margin: -.1rem 0 0 1.1rem; }
+.attached::before { content: ""; position: absolute; left: -.75rem; top: -.45rem; width: .6rem; height: 1.2rem; border-left: 2px solid var(--bad-line); border-bottom: 2px solid var(--bad-line); border-bottom-left-radius: .4rem; }
 
-/* Shared: collapsed cards + popover */
-.shared { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.5rem; margin-top: 1rem; }
-.lane { display: flex; gap: .9rem; align-items: flex-start; overflow-x: auto; padding: .4rem .2rem 1rem; }
-.mini { position: relative; flex: none; width: 13rem; padding: .7rem .8rem; border: 1px solid var(--line-strong); border-radius: .9rem; background: var(--panel-2); }
-.mini.is-viol { border-bottom: 3px solid var(--viol); }
-.mini h3 { margin: .35rem 0 .2rem; font-family: var(--mono); font-size: .9rem; }
-.mini p { margin: 0 0 .5rem; font-size: .78rem; color: var(--muted); }
-.mini .arrow { position: absolute; left: -1.05rem; top: 2.2rem; display: grid; place-items: center; width: 1.2rem; height: 1.2rem; border-radius: 50%; background: var(--viol); color: var(--on-solid); font-size: .72rem; font-weight: 700; }
-.mini.before { opacity: .75; }
-.popv { width: min(25rem, 100%); padding: .7rem .8rem; border: 1px solid var(--line-strong); border-radius: .6rem; background: var(--panel); box-shadow: 0 12px 30px var(--shadow-soft); }
-.popv .pop-head { display: flex; align-items: center; gap: .5rem; padding-bottom: .4rem; margin-bottom: .45rem; border-bottom: 1px solid var(--line); }
-.popv ol { margin: 0; padding: 0; list-style: none; }
-.popv li { padding: .35rem 0; }
-.popv li + li { border-top: 1px dashed var(--line-strong); }
-.popv .row { display: flex; align-items: baseline; gap: .5rem; }
-.popv .row b { color: var(--viol); }
-.popv .row .where { margin-left: auto; font-family: var(--mono); font-size: .72rem; color: var(--muted); }
-.popv p { margin: .15rem 0 0; font-size: .86rem; }
-.popv .foot { margin-top: .45rem; font-size: .76rem; color: var(--faint); }
+/* 5. Checks as questions (option A's rewritten "Rule evaluations" block). */
+.check { padding: .45rem 0; border-top: 1px dashed var(--tint-line); }
+.check:first-of-type { border-top: 0; }
+.check-q { display: flex; align-items: baseline; gap: .5rem; font-size: .86rem; font-weight: 600; }
+.check-q .badge { flex: none; min-width: 4.6rem; justify-content: center; }
+.check-a { margin: .2rem 0 0 5.1rem; font-size: .84rem; }
+.check-a p { margin: .15rem 0; }
+.check-a code { font-size: .8rem; }
 
-table.words { width: 100%; border-collapse: collapse; margin-top: .8rem; font-size: .88rem; }
-table.words th, table.words td { padding: .45rem .6rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-table.words th { font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-table.words td:first-child { font-family: var(--mono); font-size: .78rem; color: var(--muted); overflow-wrap: anywhere; }
-table.words td b { color: var(--viol); }
-table.words td b.u { color: var(--undec); }
+/* 6. Option C's right-hand summary */
+.sum-tally { display: grid; grid-template-columns: repeat(3, 1fr); gap: .35rem; margin: .1rem 0 .4rem; }
+.sum-tally .badge { flex-direction: column; gap: 0; padding: .3rem .2rem; font-size: .72rem; }
+.sum-tally .badge b { font-family: var(--mono); font-size: 1.15rem; }
+.sum-link { display: flex; align-items: center; gap: .45rem; width: 100%; margin-top: .3rem; padding: .3rem .5rem; border: 1px solid var(--bad-line); border-radius: .45rem; background: var(--bad-bg); color: var(--bad-ink); font-size: .82rem; font-weight: 600; text-align: left; cursor: pointer; }
+.sum-link:hover { filter: brightness(1.08); }
+.sum-link .step-chip { margin-left: auto; }
 
-@media (max-width: 1000px) {
-  .card { grid-template-columns: minmax(0, 1fr); }
-  .meta { border-right: 0; border-bottom: 1px solid var(--line); }
-  .a-grid, .a-viols, .b-wrap, .c-grid, .shared, .quotes2 { grid-template-columns: minmax(0, 1fr); }
-  .rail { padding-left: 0; border-left: 0; }
-  details.fold > summary { grid-template-columns: 1rem 5.5rem minmax(0, 1fr); }
-  details.fold > summary .f-meta { display: none; }
-  .story > li { grid-template-columns: 3.8rem minmax(0, 1fr); }
-  .story > li::before { left: 1.9rem; }
-  .qa-a, .qa-more { margin-left: 0; }
+/* Shared: collapsed cards + popover, laid out statically */
+.mk-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.5rem; }
+.mk-row .lane-track { flex-wrap: wrap; width: auto; gap: 1rem 1.6rem; padding-left: .6rem; }
+.mk-row .st-card { cursor: default; }
+.mk-row .arrow-pop { position: static; pointer-events: auto; max-height: none; }
+.pop-rule strong { color: var(--bad-ink); }
+.pop-rule .step-chip { margin-left: auto; }
+
+table.mk-words { width: 100%; border-collapse: collapse; font-size: .86rem; }
+table.mk-words th, table.mk-words td { padding: .45rem .6rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+table.mk-words th { font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+table.mk-words td:first-child { font-family: var(--mono); font-size: .76rem; color: var(--muted); overflow-wrap: anywhere; word-break: break-word; }
+@media (max-width: 700px) { table.mk-words th:nth-child(4), table.mk-words td:nth-child(4) { display: none; } table.mk-words td:first-child { min-width: 7rem; } }
+
+@media (max-width: 1100px) {
+  .mk-row, .violation .evi { grid-template-columns: minmax(0, 1fr); }
+  .check-a { margin-left: 0; }
+  .mk-lane .lane-scroll { padding-left: .6rem; padding-right: .6rem; }
 }
 </style>
 </head>
 <body>
-<div class="page">
+<div class="mk-page">
 
-<div class="top">
-  <h1>Step detail · 折叠与规则违反展示方案</h1>
-  <span class="mono">mockup · GPT-4o_018_alfworld · S03</span>
-  <button type="button" id="theme">切换明暗</button>
-</div>
-
-<div class="intro">
-  <p>用 alfworld 018 的 <b>S03</b> 做样例（真实数据：S03 有 2 条 violated、1 条 unknown）。三个方案共用以下约定：</p>
-  <ul>
-    <li><b>只有 Action 默认展开</b>。Env / Memory / Reflection / Plan / Outcome / Facts / Admissible 都折成一行：标签 + 最后一行内容预览（与收起卡片的副标题同一逻辑），点开看全文。</li>
-    <li><b>被规则引用的原文自动高亮</b>：fact 自带 <code>span</code>（如 <code>'go to drawer 1'</code>、<code>Nothing happens.</code>），直接在 Action / Env 文本里标出；即使字段折叠，预览也改为显示这段被引用的原文。</li>
-    <li><b>规则用人话写</b>：标题（Command not accepted）+ 一句解释 + agent/env 引用卡片；<code>decision.applicability/v1</code>、<code>explicit_contract_mismatch</code>、<code>f41 f42</code> 收进 “technical details”。</li>
-    <li><b>视觉沿用 Query Graph tour 详情</b>：编号小节标题、红色 verdict 框 + 实心标签、按来源着色的引用卡（agent 橙 / env 青）、琥珀色步号、虚线下划线的折叠入口。</li>
-  </ul>
-  <nav class="toc"><a href="#opt-a">A · 结论置顶</a><a class="rec" href="#opt-b">B · 故事流 + 就地标注（推荐）</a><a href="#opt-c">C · 检查清单</a><a href="#shared">共用：收起卡片与箭头浮层</a><a href="#words">规则文案表</a></nav>
-</div>
-
-<!-- ================= OPTION A ================= -->
-<section class="opt" id="opt-a">
-  <div class="opt-head"><h2>A · 结论置顶</h2><span class="tag">改动最小</span></div>
-  <div class="notes">
-    <p>展开卡片顶部先放 <b>“What went wrong at S03”</b>，每条违反一个 verdict 框并排；下面左侧是步骤内容（Action 展开，其余折叠），右侧是调试器产物（TRACE / ROUTE / Facts）。</p>
-    <p class="pros">结构与现在的三栏接近，实现量小；打开卡片第一眼就是问题。</p>
-    <p class="cons">违反说明与它所指的 Action / Env 分开两处，要靠高亮颜色对应。</p>
+<div class="traj-head">
+  <div>
+    <div class="eyebrow">Mockup · Execution path · GPT-4o_018_alfworld · S03</div>
+    <h2 class="traj-title">Step detail: 折叠与规则违反</h2>
+    <p class="traj-hint">全部沿用原页面的卡片、色块、徽章和字体（直接加载站点的 theme / workbench / trajectory 样式表）；只借用 tour 的“原文高亮 + 来源配色 + 结论框”手法。</p>
   </div>
+  <button class="badge mk-theme" type="button" id="theme">切换明暗</button>
+</div>
 
-  <article class="card is-viol">
-    <div class="meta">
-      <span class="idx">S03</span>
-      <h3>go to drawer 1</h3>
-      <p>I expect to either find the keychain or gather clues about its whereabouts.</p>
-      <span class="pill viol">⚠ Not accepted</span><span class="pill viol">⚠ No effect</span><span class="pill">7 facts</span>
-    </div>
-    <div class="body">
-      <div class="sec">
-        <div class="h is-viol"><b>!</b><span>What went wrong at S03</span><em>2 rules violated · 1 undecided</em></div>
-        <div class="a-viols">
-          <div class="verdict">
-            <div class="v-head"><span class="v-tag">RULE VIOLATED</span><b>Command not accepted</b><span class="where">S03 · action</span></div>
-            <p class="v-say">The agent wrapped its command in quotes, so it matches none of the commands the environment accepts.</p>
-            <div class="quotes2">
-              <div class="quote" data-src="agent"><span class="k">agent sent · S03</span><mark class="hl">'go to drawer 1'</mark></div>
-              <div class="quote" data-src="ok"><span class="k">accepted form</span>go to drawer 1</div>
-            </div>
-            <details class="full"><summary>technical details</summary><dl><dt>rule</dt><dd>decision.applicability/v1</dd><dt>reason</dt><dd>explicit_contract_mismatch</dd><dt>facts</dt><dd><span class="fid">f41</span> go(drawer:1) = go to drawer 1 · <span class="fid">f42</span> admissibility(int:i3) = quoted</dd></dl></details>
-          </div>
-          <div class="verdict">
-            <div class="v-head"><span class="v-tag">RULE VIOLATED</span><b>Action had no effect</b><span class="where">S02 → S03</span></div>
-            <p class="v-say">The previous command <span class="stepno">S02</span> <code>'look'</code> changed nothing: the environment answered with a no-op.</p>
-            <div class="quotes2">
-              <div class="quote" data-src="agent"><span class="k">agent sent · S02</span>'look'</div>
-              <div class="quote" data-src="env"><span class="k">environment replied · S03</span><mark class="hl env">Nothing happens.</mark></div>
-            </div>
-            <p class="v-caveat">This records what happened, not whose fault it is.</p>
-            <details class="full"><summary>technical details</summary><dl><dt>rule</dt><dd>execution.result/v1</dd><dt>reason</dt><dd>explicit_no_effect_not_responsibility_judgment</dd><dt>facts</dt><dd><span class="fid">f34</span> look(agent:self) = look · <span class="fid">f36</span> effect(agent:self) = none</dd></dl></details>
-          </div>
-        </div>
-        <details class="full undec-line"><summary>1 check undecided · Did this step make progress?</summary><p class="k" style="margin:.3rem 0">Can't tell: the action differs from the previous one, so “same action, no progress” can't be compared. (progress.efficiency/v1 · non_equivalent_action)</p></details>
+<ul class="mk-intro">
+  <li><b>只有 Action 默认展开</b>：Env / Memory / Reflection / Plan / Outcome / Facts / Admissible / Agent 保持原来的色块，但折成一行：名称 + 最后一行预览 + 右侧角色标签，点开即原来的 text-box。</li>
+  <li><b>被规则引用的原文就地高亮</b>：fact 自带原文 <code>span</code>，直接在 Action / Env 文本里标出（红 = 出问题的命令，青 = 环境回复，绿 = 正确写法）；折叠时预览也显示这段原文，并带 “cited” 徽章。</li>
+  <li><b>违反用人话写</b>：卡片结构照搬 TRACE candidate（徽章 + 步号 chip + 标题 + 说明 + 引用），规则 ID 和 fact 编号收进 “Rule details”，展开后就是原来那一行 eval-row。</li>
+</ul>
+<nav class="mk-toc"><a class="badge" href="#opt-a">A · 保持原三栏</a><a class="badge" href="#opt-b">B · 问题单独一栏</a><a class="badge warn" href="#opt-c">C · 就地标注（推荐）</a><a class="badge" href="#shared">共用：收起卡片 / 箭头浮层</a><a class="badge" href="#words">规则文案表</a></nav>
+
+<!-- ======================= A ======================= -->
+<section class="mk-sec" id="opt-a">
+  <div class="traj-head"><div><div class="eyebrow">Option A · 改动最小</div><h2>保持原三栏，Rule evaluations 改写成问答</h2></div></div>
+  <div class="mk-notes">
+    <p>列的分工与现在完全相同（State/Action/Outcome · Reasoning · 调试器产物）。第三栏顶部原来的 “Rule evaluations” 改成 <b>Checks</b>：每条规则一句问题 + No / Can't tell / Yes。</p>
+    <p class="mk-pro">用户最熟悉，代码只动折叠和 Rule evaluations 一块。</p>
+    <p class="mk-con">问题在第三栏、原文在第一栏，只靠高亮颜色对应；第二栏折叠后较空。</p>
+  </div>
+  <section class="lane lane-steps mk-lane"><div class="lane-scroll"><div class="lane-track">
+    <article class="st-card is-open has-violation" data-step="3">
+      <button class="step-arrow is-warn" type="button">→</button>
+      <div class="card-meta">
+        <div class="card-top"><span class="mono card-idx">S03</span><button class="card-toggle" type="button">−</button></div>
+        <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg></span>
+        <h3 class="card-title">go to drawer 1</h3>
+        <p class="card-sub">I expect to either find the keychain or gather clues about its whereabouts.</p>
+        <div class="card-foot"><span class="badge warn">⚠ Not accepted</span><span class="badge warn">⚠ No effect</span><span class="badge">7 facts</span></div>
+        <div class="heat"><span style="width:60%"></span></div>
       </div>
-
-      <div class="a-grid">
-        <div>
-          <div class="h"><b>1</b><span>What the agent did</span><em>S03</em></div>
-          <div class="act is-viol">
-            <div class="act-top"><span class="lab">ACTION</span><span class="pill viol flag">⚠ Not accepted</span></div>
-            <p class="act-cmd"><mark class="hl">'go to drawer 1'</mark></p>
-          </div>
-          <div class="group-k k">context · folded</div>
-          <details class="fold" data-src="env"><summary><span class="f-lab"><small>state</small>Env</span><span class="f-prev is-hot"><mark class="hl env">Nothing happens.</mark></span><span class="f-meta viol">cited</span></summary><div class="f-body"><mark class="hl env">Nothing happens.</mark></div></details>
-          <details class="fold" data-src="mind"><summary><span class="f-lab"><small>reasoning</small>Memory</span><span class="f-prev">These memory steps indicate that I began by checking my inventory and then tried to look around…</span><span class="f-meta">4 lines</span></summary><div class="f-body">Look at the past observations and actions from our conversation history.
+      <div class="card-detail step-detail">
+        <div class="detail-col">
+          <details class="detail-block role-state tone-teal fold"><summary><span class="fold-name">Env</span><span class="fold-prev"><mark class="hit env">Nothing happens.</mark></span><span class="badge teal">cited</span><span class="role-tag">State</span></summary><div class="text-box"><mark class="hit env">Nothing happens.</mark></div></details>
+          <div class="detail-block role-action tone-plain is-key has-problem"><h4>Action<span class="badge bad">⚠ Not accepted</span><span class="role-tag">Action</span></h4><div class="text-box"><mark class="hit">'go to drawer 1'</mark></div></div>
+          <details class="detail-block role-outcome tone-teal-2 fold"><summary><span class="fold-name">Env → S04</span><span class="fold-prev">Nothing happens.</span><span class="role-tag">Outcome</span></summary><div class="text-box">Nothing happens.</div></details>
+        </div>
+        <div class="detail-col">
+          <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Memory</span><span class="fold-prev">These memory steps indicate that I began by checking my inventory and then tried to look around…</span><span class="role-tag">Reasoning</span></summary><div class="text-box">Look at the past observations and actions from our conversation history.
 - Step 1: Observation: You are in the middle of a room. You see various items including a sidetable. Action: 'inventory'
 - Step 2: Observation: You are not carrying anything. Action: 'look'
 These memory steps indicate that I began by checking my inventory and then tried to look around for more details, but did not find anything specific about the keychain.</div></details>
-          <details class="fold" data-src="mind"><summary><span class="f-lab"><small>reasoning</small>Reflection</span><span class="f-prev">I need to explore the environment to locate the keychain or determine its whereabouts.</span><span class="f-meta">5 lines</span></summary><div class="f-body">Reflect on the last action and its outcome
+          <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Reflection</span><span class="fold-prev">I need to explore the environment to locate the keychain or determine its whereabouts.</span><span class="role-tag">Reasoning</span></summary><div class="text-box">Reflect on the last action and its outcome
 - Did I complete the task goal? No, the task goal of putting a keychain on the sidetable has not been completed.
-- Was last action successful or did it encounter issues? The last action 'look' resulted in a non-informative response, "Nothing happens," indicating no progress was made.
+- Was last action successful or did it encounter issues? The last action 'look' resulted in a non-informative response, <mark class="hit env">"Nothing happens,"</mark> indicating no progress was made.
 - Am I making progress toward the task goal? No current progress toward finding or interacting with the keychain.
 - If the action did not go as expected and did not result in progress, provide constructive feedback to guide the next planning step. I need to explore the environment to locate the keychain or determine its whereabouts.</div></details>
-          <details class="fold" data-src="mind"><summary><span class="f-lab"><small>reasoning</small>Plan</span><span class="f-prev">I expect to either find the keychain or gather clues about its whereabouts.</span><span class="f-meta">4 lines</span></summary><div class="f-body">Plan the next step based on memory and reflection
+          <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Plan</span><span class="fold-prev">I expect to either find the keychain or gather clues about its whereabouts.</span><span class="role-tag">Reasoning</span></summary><div class="text-box">Plan the next step based on memory and reflection
 - Given what I've learned, what should I do next? I should navigate to locations where small items like a keychain could be stored, such as drawers, shelves, or sidetables.
 - Please explain why this plan is helpful for the next action? Checking these locations may lead to finding the keychain, which is necessary to complete the task goal.
 - What do I expect this action to achieve? I expect to either find the keychain or gather clues about its whereabouts.</div></details>
-          <details class="fold" data-src="env"><summary><span class="f-lab"><small>outcome</small>Env → S04</span><span class="f-prev">Nothing happens.</span><span class="f-meta"></span></summary><div class="f-body">Nothing happens.</div></details>
         </div>
-        <div>
-          <div class="h"><b>2</b><span>Debugger findings</span><em>S03</em></div>
-          <p class="k">No TRACE candidate or ROUTE anchor at this step. (Where they exist they keep today's cards, with the quote highlighted the same way.)</p>
-          <details class="fold"><summary><span class="f-lab"><small>dsl</small>Facts</span><span class="f-prev">2 env · 5 mind · 2 cited by the rules above</span><span class="f-meta">7</span></summary><div class="f-body">ENV  f36 effect(agent:self) = none · f42 admissibility(int:i3) = quoted
-MIND f37 recalled_summary · f38 recalled_nothing · f39 assessed · f40 planned · f41 go(drawer:1)</div></details>
-          <details class="fold"><summary><span class="f-lab"><small>other</small>Admissible</span><span class="f-prev">go to armchair 1, go to bed 1, go to drawer 1, …</span><span class="f-meta">27</span></summary><div class="f-body">go to armchair 1 · go to bed 1 · <mark class="hl soft">go to drawer 1</mark> · go to drawer 10 · … · inventory · look</div></details>
-          <details class="fold"><summary><span class="f-lab"><small>other</small>Agent</span><span class="f-prev">raw source</span><span class="f-meta"></span></summary><div class="f-body">&lt;memory&gt; … &lt;/memory&gt; &lt;reflection&gt; … &lt;action&gt;'go to drawer 1'&lt;/action&gt;</div></details>
-        </div>
-      </div>
-    </div>
-  </article>
-</section>
-
-<!-- ================= OPTION B ================= -->
-<section class="opt" id="opt-b">
-  <div class="opt-head"><h2>B · 故事流 + 就地标注</h2><span class="tag rec">推荐</span></div>
-  <div class="notes">
-    <p>按 <b>SAW → THOUGHT → DID → GOT</b> 竖排读一步；三段 reasoning 合成一行可展开。违反以 callout <b>挂在它所指的那一段下面</b>：“No effect” 挂在 SAW（S03 看到的 “Nothing happens.” 正是 S02 的结果），“Not accepted” 挂在 DID。右侧窄栏汇总检查数并可跳转。</p>
-    <p class="pros">问题出现在原文旁边，不需要来回对照；“上一步的结果在这一步才看到” 这种时间关系也说清了。</p>
-    <p class="cons">与现在的三栏差异最大；一步内违反很多时纵向会变长（可只展开第一条，其余折叠）。</p>
-  </div>
-
-  <article class="card is-viol">
-    <div class="meta">
-      <span class="idx">S03</span>
-      <h3>go to drawer 1</h3>
-      <p>I expect to either find the keychain or gather clues about its whereabouts.</p>
-      <span class="pill viol">⚠ Not accepted</span><span class="pill viol">⚠ No effect</span><span class="pill">7 facts</span>
-    </div>
-    <div class="body b-wrap">
-      <ol class="story">
-        <li>
-          <span class="beat" data-src="env">SAW<small>env</small></span>
-          <div>
-            <details class="fold" data-src="env"><summary><span class="f-lab"><small>state</small>Env</span><span class="f-prev is-hot"><mark class="hl env">Nothing happens.</mark></span><span class="f-meta viol">cited</span></summary><div class="f-body"><mark class="hl env">Nothing happens.</mark></div></details>
-            <div class="verdict callout" id="b-v2">
-              <div class="v-head"><span class="v-tag">RULE VIOLATED</span><b>Previous action had no effect</b><span class="where">S02 → S03</span></div>
-              <p class="v-say">This reply is the result of <span class="stepno">S02</span>'s command <code>'look'</code>: it changed nothing.</p>
-              <p class="v-caveat">This records what happened, not whose fault it is.</p>
-              <details class="full"><summary>technical details</summary><dl><dt>rule</dt><dd>execution.result/v1</dd><dt>reason</dt><dd>explicit_no_effect_not_responsibility_judgment</dd><dt>facts</dt><dd><span class="fid">f34</span> look(agent:self) = look · <span class="fid">f36</span> effect(agent:self) = none</dd></dl></details>
+        <div class="detail-col">
+          <div class="detail-block tone-bad">
+            <h4>Checks · 3<span class="chip-row"><span class="badge bad">no 2</span><span class="badge warn">can't tell 1</span></span></h4>
+            <div class="check">
+              <div class="check-q"><span class="badge bad">No</span>Could the environment run this command?</div>
+              <div class="check-a"><p>It is wrapped in quotes, so it matches none of the 27 accepted commands. Accepted form: <code><mark class="hit ok">go to drawer 1</mark></code></p>
+                <details><summary>Rule details</summary><div class="eval-row"><span class="badge bad">violated</span><span class="mono">decision.applicability/v1</span><span class="muted">explicit_contract_mismatch</span><button class="mono link">f41</button><button class="mono link">f42</button></div></details></div>
+            </div>
+            <div class="check">
+              <div class="check-q"><span class="badge bad">No</span>Did the previous action (<button class="step-chip">S02</button>) change anything?</div>
+              <div class="check-a"><p><code>'look'</code> → <mark class="hit env">Nothing happens.</mark> This records what happened, not whose fault it is.</p>
+                <details><summary>Rule details</summary><div class="eval-row"><span class="badge bad">violated</span><span class="mono">execution.result/v1</span><span class="muted">explicit_no_effect_not_responsibility_judgment</span><button class="mono link">f34</button><button class="mono link">f36</button></div></details></div>
+            </div>
+            <div class="check">
+              <div class="check-q"><span class="badge warn">Can't tell</span>Did this step move the task forward?</div>
+              <div class="check-a"><p class="muted">The action differs from the previous one, so repetition can't be compared.</p></div>
             </div>
           </div>
-        </li>
-        <li>
-          <span class="beat" data-src="mind">THOUGHT<small>3 fields</small></span>
-          <div>
-            <details class="fold" data-src="mind"><summary><span class="f-lab"><small>reasoning</small>Memory</span><span class="f-prev">These memory steps indicate that I began by checking my inventory and then tried to look around…</span><span class="f-meta">4 lines</span></summary><div class="f-body">Look at the past observations and actions from our conversation history.
+          <details class="detail-block tone-violet fold"><summary><span class="fold-name">Facts · 7</span><span class="fold-prev">3 cited by the checks above</span></summary><div class="chip-col" style="margin-top:.45rem"><button class="fact-chip side-env"><span class="mono fid">f36</span><span class="fact-text">effect(agent:self) = none</span><span class="slot mono">obs</span></button><button class="fact-chip side-env"><span class="mono fid">f42</span><span class="fact-text">admissibility(int:i3) = quoted</span><span class="slot mono">chk</span></button><button class="fact-chip side-mind"><span class="mono fid">f41</span><span class="fact-text">go(drawer:1) = go to drawer 1</span><span class="slot mono">act</span></button></div></details>
+          <details class="detail-block fold"><summary><span class="fold-name">Agent · raw source</span></summary><div class="text-box">&lt;memory&gt; … &lt;action&gt;'go to drawer 1'&lt;/action&gt;</div></details>
+          <details class="detail-block fold"><summary><span class="fold-name">Admissible · 27</span><span class="fold-prev">go to armchair 1, go to bed 1, go to drawer 1, …</span></summary><div class="chip-row" style="margin-top:.45rem"><span class="chip mono">go to armchair 1</span><span class="chip mono">go to bed 1</span><span class="chip mono"><mark class="hit ok">go to drawer 1</mark></span><span class="chip mono">…</span><span class="chip mono">inventory</span><span class="chip mono">look</span></div></details>
+        </div>
+      </div>
+    </article>
+  </div></div></section>
+</section>
+
+<!-- ======================= B ======================= -->
+<section class="mk-sec" id="opt-b">
+  <div class="traj-head"><div><div class="eyebrow">Option B</div><h2>问题单独一栏</h2></div></div>
+  <div class="mk-notes">
+    <p>第一栏按阅读顺序放整步内容（Env → Memory / Reflection / Plan → <b>Action</b> → Outcome，只有 Action 展开）；第二栏专放 <b>Problems</b>，每条一张 candidate 式卡片；第三栏是 TRACE / ROUTE / Facts。</p>
+    <p class="mk-pro">一栏读步骤、一栏读问题，层次最清楚；问题卡片和 TRACE 卡片同构，用户不用学新样式。</p>
+    <p class="mk-con">问题与原文仍分两栏；没有违反的步骤第二栏为空（可隐藏，退回两栏）。</p>
+  </div>
+  <section class="lane lane-steps mk-lane"><div class="lane-scroll"><div class="lane-track">
+    <article class="st-card is-open has-violation" data-step="3">
+      <button class="step-arrow is-warn" type="button">→</button>
+      <div class="card-meta">
+        <div class="card-top"><span class="mono card-idx">S03</span><button class="card-toggle" type="button">−</button></div>
+        <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg></span>
+        <h3 class="card-title">go to drawer 1</h3>
+        <p class="card-sub">I expect to either find the keychain or gather clues about its whereabouts.</p>
+        <div class="card-foot"><span class="badge warn">⚠ Not accepted</span><span class="badge warn">⚠ No effect</span><span class="badge">7 facts</span></div>
+        <div class="heat"><span style="width:60%"></span></div>
+      </div>
+      <div class="card-detail step-detail">
+        <div class="detail-col">
+          <div class="eyebrow">The step</div>
+          <div class="fold-stack">
+            <details class="detail-block role-state tone-teal fold"><summary><span class="fold-name">Env</span><span class="fold-prev"><mark class="hit env">Nothing happens.</mark></span><span class="badge teal">cited</span><span class="role-tag">State</span></summary><div class="text-box"><mark class="hit env">Nothing happens.</mark></div></details>
+            <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Memory</span><span class="fold-prev">These memory steps indicate that I began by checking my inventory…</span><span class="role-tag">Reasoning</span></summary><div class="text-box">Look at the past observations and actions from our conversation history.
+- Step 1: Observation: … Action: 'inventory'
+- Step 2: Observation: You are not carrying anything. Action: 'look'
+These memory steps indicate that I began by checking my inventory and then tried to look around for more details, but did not find anything specific about the keychain.</div></details>
+            <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Reflection</span><span class="fold-prev">I need to explore the environment to locate the keychain…</span><span class="role-tag">Reasoning</span></summary><div class="text-box">… The last action 'look' resulted in a non-informative response, <mark class="hit env">"Nothing happens,"</mark> indicating no progress was made. …</div></details>
+            <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Plan</span><span class="fold-prev">I expect to either find the keychain or gather clues about its whereabouts.</span><span class="role-tag">Reasoning</span></summary><div class="text-box">… I should navigate to locations where small items like a keychain could be stored, such as drawers, shelves, or sidetables. …</div></details>
+          </div>
+          <div class="detail-block role-action tone-plain is-key has-problem"><h4>Action<span class="badge bad">⚠ Not accepted</span><span class="role-tag">Action</span></h4><div class="text-box"><mark class="hit">'go to drawer 1'</mark></div></div>
+          <details class="detail-block role-outcome tone-teal-2 fold"><summary><span class="fold-name">Env → S04</span><span class="fold-prev">Nothing happens.</span><span class="role-tag">Outcome</span></summary><div class="text-box">Nothing happens.</div></details>
+        </div>
+        <div class="detail-col">
+          <div class="eyebrow">Problems · 2</div>
+          <div class="detail-block candidate tone-bad violation">
+            <h4><span class="chip-row"><span class="badge bad">violated</span><button class="step-chip">S03</button><strong>Command not accepted</strong></span></h4>
+            <p>The agent wrapped its command in quotes, so it matches none of the 27 commands the environment accepts.</p>
+            <div class="evi">
+              <blockquote><span class="eyebrow">agent sent · S03</span><mark class="hit">'go to drawer 1'</mark></blockquote>
+              <blockquote class="ok"><span class="eyebrow">accepted form</span><mark class="hit ok">go to drawer 1</mark></blockquote>
+            </div>
+            <details><summary>Rule details</summary><div class="eval-row"><span class="badge bad">violated</span><span class="mono">decision.applicability/v1</span><span class="muted">explicit_contract_mismatch</span><button class="mono link">f41</button><button class="mono link">f42</button></div></details>
+          </div>
+          <div class="detail-block candidate tone-bad violation">
+            <h4><span class="chip-row"><span class="badge bad">violated</span><button class="step-chip">S02</button>→<button class="step-chip">S03</button><strong>Action had no effect</strong></span></h4>
+            <p>The previous command changed nothing: the environment answered with a no-op.</p>
+            <div class="evi">
+              <blockquote><span class="eyebrow">agent sent · S02</span>'look'</blockquote>
+              <blockquote class="env"><span class="eyebrow">environment replied · S03</span><mark class="hit env">Nothing happens.</mark></blockquote>
+            </div>
+            <p class="note">This records what happened, not whose fault it is.</p>
+            <details><summary>Rule details</summary><div class="eval-row"><span class="badge bad">violated</span><span class="mono">execution.result/v1</span><span class="muted">explicit_no_effect_not_responsibility_judgment</span><button class="mono link">f34</button><button class="mono link">f36</button></div></details>
+          </div>
+          <details class="detail-block tone-warn fold"><summary><span class="fold-name">1 check undecided</span><span class="fold-prev">Did this step move the task forward?</span></summary><div class="eval-row"><span class="badge warn">can't tell</span><span>The action differs from the previous one, so repetition can't be compared.</span></div></details>
+        </div>
+        <div class="detail-col">
+          <div class="eyebrow">Debugger findings</div>
+          <div class="detail-block muted">No TRACE candidate or ROUTE anchor at this step.</div>
+          <details class="detail-block tone-violet fold"><summary><span class="fold-name">Facts · 7</span><span class="fold-prev">3 cited by the problems</span></summary><div class="chip-col" style="margin-top:.45rem"><button class="fact-chip side-env"><span class="mono fid">f36</span><span class="fact-text">effect(agent:self) = none</span><span class="slot mono">obs</span></button><button class="fact-chip side-env"><span class="mono fid">f42</span><span class="fact-text">admissibility(int:i3) = quoted</span><span class="slot mono">chk</span></button></div></details>
+          <details class="detail-block fold"><summary><span class="fold-name">Agent · raw source</span></summary><div class="text-box">&lt;memory&gt; … &lt;action&gt;'go to drawer 1'&lt;/action&gt;</div></details>
+          <details class="detail-block fold"><summary><span class="fold-name">Admissible · 27</span><span class="fold-prev">go to armchair 1, go to bed 1, go to drawer 1, …</span></summary><div class="chip-row" style="margin-top:.45rem"><span class="chip mono"><mark class="hit ok">go to drawer 1</mark></span><span class="chip mono">…</span></div></details>
+        </div>
+      </div>
+    </article>
+  </div></div></section>
+</section>
+
+<!-- ======================= C ======================= -->
+<section class="mk-sec" id="opt-c">
+  <div class="traj-head"><div><div class="eyebrow">Option C · 推荐</div><h2>就地标注：问题挂在它所指的字段下面</h2></div></div>
+  <div class="mk-notes">
+    <p>左侧两栏宽度放整步内容，<b>违反卡片直接挂在相关字段下方</b>（用一条红色连接线）：“No effect” 挂在 Env 下（S03 看到的 “Nothing happens.” 就是 S02 的结果），“Not accepted” 挂在 Action 下。右栏是本步检查汇总（可点击跳转）和调试器产物。</p>
+    <p class="mk-pro">问题就在原文旁边，无需来回对照；跨步关系（S02 → S03）一目了然。</p>
+    <p class="mk-con">比现在多一种“挂载”样式；违反很多时左栏变长（第 2 条起可默认折叠）。</p>
+  </div>
+  <section class="lane lane-steps mk-lane"><div class="lane-scroll"><div class="lane-track">
+    <article class="st-card is-open has-violation" data-step="3">
+      <button class="step-arrow is-warn" type="button">→</button>
+      <div class="card-meta">
+        <div class="card-top"><span class="mono card-idx">S03</span><button class="card-toggle" type="button">−</button></div>
+        <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg></span>
+        <h3 class="card-title">go to drawer 1</h3>
+        <p class="card-sub">I expect to either find the keychain or gather clues about its whereabouts.</p>
+        <div class="card-foot"><span class="badge warn">⚠ Not accepted</span><span class="badge warn">⚠ No effect</span><span class="badge">7 facts</span></div>
+        <div class="heat"><span style="width:60%"></span></div>
+      </div>
+      <div class="card-detail step-detail" style="grid-template-columns: minmax(0, 2fr) minmax(0, 1fr)">
+        <div class="detail-col">
+          <details class="detail-block role-state tone-teal fold"><summary><span class="fold-name">Env</span><span class="fold-prev"><mark class="hit env">Nothing happens.</mark></span><span class="badge teal">cited</span><span class="role-tag">State</span></summary><div class="text-box"><mark class="hit env">Nothing happens.</mark></div></details>
+          <div class="detail-block candidate tone-bad violation attached" id="c-v2">
+            <h4><span class="chip-row"><span class="badge bad">violated</span><button class="step-chip">S02</button>→<button class="step-chip">S03</button><strong>Previous action had no effect</strong></span></h4>
+            <p>This reply is the result of S02's command <code>'look'</code>: it changed nothing. <span class="note">This records what happened, not whose fault it is.</span></p>
+            <details><summary>Rule details</summary><div class="eval-row"><span class="badge bad">violated</span><span class="mono">execution.result/v1</span><span class="muted">explicit_no_effect_not_responsibility_judgment</span><button class="mono link">f34</button><button class="mono link">f36</button></div></details>
+          </div>
+          <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Memory</span><span class="fold-prev">These memory steps indicate that I began by checking my inventory and then tried to look around…</span><span class="role-tag">Reasoning</span></summary><div class="text-box">Look at the past observations and actions from our conversation history.
 - Step 1: Observation: You are in the middle of a room. You see various items including a sidetable. Action: 'inventory'
 - Step 2: Observation: You are not carrying anything. Action: 'look'
 These memory steps indicate that I began by checking my inventory and then tried to look around for more details, but did not find anything specific about the keychain.</div></details>
-            <details class="fold" data-src="mind"><summary><span class="f-lab"><small>reasoning</small>Reflection</span><span class="f-prev">The last action 'look' resulted in a non-informative response, <mark class="hl env">"Nothing happens,"</mark> …</span><span class="f-meta">5 lines</span></summary><div class="f-body">Reflect on the last action and its outcome
+          <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Reflection</span><span class="fold-prev">The last action 'look' resulted in a non-informative response, <mark class="hit env">"Nothing happens,"</mark> …</span><span class="role-tag">Reasoning</span></summary><div class="text-box">Reflect on the last action and its outcome
 - Did I complete the task goal? No, the task goal of putting a keychain on the sidetable has not been completed.
-- Was last action successful or did it encounter issues? The last action 'look' resulted in a non-informative response, <mark class="hl env">"Nothing happens,"</mark> indicating no progress was made.
+- Was last action successful or did it encounter issues? The last action 'look' resulted in a non-informative response, <mark class="hit env">"Nothing happens,"</mark> indicating no progress was made.
 - Am I making progress toward the task goal? No current progress toward finding or interacting with the keychain.
 - If the action did not go as expected and did not result in progress, provide constructive feedback to guide the next planning step. I need to explore the environment to locate the keychain or determine its whereabouts.</div></details>
-            <details class="fold" data-src="mind"><summary><span class="f-lab"><small>reasoning</small>Plan</span><span class="f-prev">I expect to either find the keychain or gather clues about its whereabouts.</span><span class="f-meta">4 lines</span></summary><div class="f-body">Plan the next step based on memory and reflection
+          <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Plan</span><span class="fold-prev">I expect to either find the keychain or gather clues about its whereabouts.</span><span class="role-tag">Reasoning</span></summary><div class="text-box">Plan the next step based on memory and reflection
 - Given what I've learned, what should I do next? I should navigate to locations where small items like a keychain could be stored, such as drawers, shelves, or sidetables.
 - Please explain why this plan is helpful for the next action? Checking these locations may lead to finding the keychain, which is necessary to complete the task goal.
 - What do I expect this action to achieve? I expect to either find the keychain or gather clues about its whereabouts.</div></details>
+          <div class="detail-block role-action tone-plain is-key has-problem"><h4>Action<span class="badge bad">⚠ Not accepted</span><span class="role-tag">Action</span></h4><div class="text-box"><mark class="hit">'go to drawer 1'</mark></div></div>
+          <div class="detail-block candidate tone-bad violation attached" id="c-v1">
+            <h4><span class="chip-row"><span class="badge bad">violated</span><button class="step-chip">S03</button><strong>Command not accepted</strong></span></h4>
+            <p>The quotes make it match none of the 27 commands the environment accepts. The accepted form is in the list: <code><mark class="hit ok">go to drawer 1</mark></code></p>
+            <details><summary>Rule details</summary><div class="eval-row"><span class="badge bad">violated</span><span class="mono">decision.applicability/v1</span><span class="muted">explicit_contract_mismatch</span><button class="mono link">f41</button><button class="mono link">f42</button></div></details>
           </div>
-        </li>
-        <li>
-          <span class="beat" data-src="agent">DID<small>action</small></span>
-          <div>
-            <div class="act is-viol">
-              <div class="act-top"><span class="lab">ACTION</span><span class="pill viol flag">⚠ Not accepted</span></div>
-              <p class="act-cmd"><mark class="hl">'go to drawer 1'</mark></p>
-            </div>
-            <div class="verdict callout" id="b-v1">
-              <div class="v-head"><span class="v-tag">RULE VIOLATED</span><b>Command not accepted</b><span class="where">S03 · action</span></div>
-              <p class="v-say">The quotes make it match none of the 27 commands the environment accepts. The accepted form exists:</p>
-              <div class="quote" data-src="ok"><span class="k">accepted form · in the admissible list</span>go to drawer 1</div>
-              <details class="full"><summary>technical details</summary><dl><dt>rule</dt><dd>decision.applicability/v1</dd><dt>reason</dt><dd>explicit_contract_mismatch</dd><dt>facts</dt><dd><span class="fid">f41</span> go(drawer:1) = go to drawer 1 · <span class="fid">f42</span> admissibility(int:i3) = quoted</dd></dl></details>
-            </div>
-          </div>
-        </li>
-        <li>
-          <span class="beat" data-src="env">GOT<small>→ S04</small></span>
-          <div>
-            <details class="fold" data-src="env"><summary><span class="f-lab"><small>outcome</small>Env → S04</span><span class="f-prev">Nothing happens.</span><span class="f-meta"></span></summary><div class="f-body">Nothing happens.</div></details>
-          </div>
-        </li>
-      </ol>
-
-      <aside class="rail">
-        <h4>Checks at S03</h4>
-        <div class="tally"><div class="viol"><b>2</b><span>violated</span></div><div class="undec"><b>1</b><span>undecided</span></div><div class="pass"><b>0</b><span>passed</span></div></div>
-        <button class="jump" type="button" data-to="b-v1"><span class="dot"></span>Command not accepted</button>
-        <button class="jump" type="button" data-to="b-v2"><span class="dot"></span>Previous action had no effect</button>
-        <details class="full"><summary>1 undecided</summary><p class="k" style="margin:.3rem 0">Made progress? Can't tell: the action differs from the previous one.</p></details>
-        <h4>Debugger findings</h4>
-        <p class="k">No TRACE candidate or ROUTE anchor here.</p>
-        <h4>More</h4>
-        <details class="fold"><summary><span class="f-lab">Facts</span><span class="f-prev">2 cited</span><span class="f-meta">7</span></summary><div class="f-body">f36 effect = none · f41 go(drawer:1) · f42 admissibility = quoted · …</div></details>
-        <details class="fold"><summary><span class="f-lab">Admissible</span><span class="f-prev">27 commands</span><span class="f-meta">27</span></summary><div class="f-body">… <mark class="hl soft">go to drawer 1</mark> … inventory · look</div></details>
-        <details class="fold"><summary><span class="f-lab">Agent</span><span class="f-prev">raw source</span><span class="f-meta"></span></summary><div class="f-body">&lt;memory&gt; … &lt;action&gt;'go to drawer 1'&lt;/action&gt;</div></details>
-      </aside>
-    </div>
-  </article>
-</section>
-
-<!-- ================= OPTION C ================= -->
-<section class="opt" id="opt-c">
-  <div class="opt-head"><h2>C · 检查清单（问答式）</h2><span class="tag">对非技术读者最友好</span></div>
-  <div class="notes">
-    <p>右栏把每条规则写成 <b>一个问题 + 答案标签</b>（NO / CAN'T TELL / YES，同 tour 的 TRACE 问答卡）。失败项默认展开并带证据；未决与通过项各折成一行。悬停某个问题时，左侧对应原文高亮。</p>
-    <p class="pros">规则本身也被解释成“它在检查什么”，用户能看出哪些检查跑过、哪些没定论。</p>
-    <p class="cons">证据仍在右侧、原文在左侧，需要悬停联动；比 B 多一层“规则”抽象。</p>
-  </div>
-
-  <article class="card is-viol">
-    <div class="meta">
-      <span class="idx">S03</span>
-      <h3>go to drawer 1</h3>
-      <p>I expect to either find the keychain or gather clues about its whereabouts.</p>
-      <span class="pill viol">✗ 2 checks failed</span><span class="pill undec">? 1</span><span class="pill">7 facts</span>
-    </div>
-    <div class="body c-grid">
-      <div>
-        <div class="h"><b>1</b><span>The step</span><em>S03</em></div>
-        <div class="act is-viol">
-          <div class="act-top"><span class="lab">ACTION</span></div>
-          <p class="act-cmd"><mark class="hl">'go to drawer 1'</mark></p>
-          <p class="act-why">Plan: I expect to either find the keychain or gather clues about its whereabouts.</p>
+          <details class="detail-block role-outcome tone-teal-2 fold"><summary><span class="fold-name">Env → S04</span><span class="fold-prev">Nothing happens.</span><span class="role-tag">Outcome</span></summary><div class="text-box">Nothing happens.</div></details>
         </div>
-        <div class="group-k k">context · folded</div>
-        <details class="fold" data-src="env"><summary><span class="f-lab"><small>state</small>Env</span><span class="f-prev is-hot"><mark class="hl env">Nothing happens.</mark></span><span class="f-meta viol">cited</span></summary><div class="f-body"><mark class="hl env">Nothing happens.</mark></div></details>
-        <details class="fold" data-src="mind"><summary><span class="f-lab"><small>reasoning</small>Memory · Reflection · Plan</span><span class="f-prev">3 fields · I need to explore the environment to locate the keychain…</span><span class="f-meta">13 lines</span></summary><div class="f-body">Memory — These memory steps indicate that I began by checking my inventory and then tried to look around…
-Reflection — I need to explore the environment to locate the keychain or determine its whereabouts.
-Plan — I expect to either find the keychain or gather clues about its whereabouts.</div></details>
-        <details class="fold" data-src="env"><summary><span class="f-lab"><small>outcome</small>Env → S04</span><span class="f-prev">Nothing happens.</span><span class="f-meta"></span></summary><div class="f-body">Nothing happens.</div></details>
-        <details class="fold"><summary><span class="f-lab"><small>more</small>Facts · Admissible · Agent</span><span class="f-prev">7 facts · 27 commands · raw source</span><span class="f-meta"></span></summary><div class="f-body">…</div></details>
+        <div class="detail-col">
+          <div class="detail-block tone-plain">
+            <h4>Checks at S03</h4>
+            <div class="sum-tally"><span class="badge bad"><b>2</b>violated</span><span class="badge warn"><b>1</b>can't tell</span><span class="badge ok"><b>0</b>passed</span></div>
+            <button class="sum-link" type="button" data-to="c-v1">Command not accepted<span class="step-chip">S03</span></button>
+            <button class="sum-link" type="button" data-to="c-v2">Previous action had no effect<span class="step-chip">S02</span></button>
+            <details><summary>1 can't tell</summary><div class="eval-row"><span class="badge warn">can't tell</span><span>Made progress? The action differs from the previous one.</span></div></details>
+          </div>
+          <div class="detail-block muted">No TRACE candidate or ROUTE anchor at this step.</div>
+          <details class="detail-block tone-violet fold"><summary><span class="fold-name">Facts · 7</span><span class="fold-prev">3 cited</span></summary><div class="chip-col" style="margin-top:.45rem"><button class="fact-chip side-env"><span class="mono fid">f36</span><span class="fact-text">effect(agent:self) = none</span><span class="slot mono">obs</span></button><button class="fact-chip side-env"><span class="mono fid">f42</span><span class="fact-text">admissibility(int:i3) = quoted</span><span class="slot mono">chk</span></button></div></details>
+          <details class="detail-block fold"><summary><span class="fold-name">Agent · raw source</span></summary><div class="text-box">&lt;memory&gt; … &lt;action&gt;'go to drawer 1'&lt;/action&gt;</div></details>
+          <details class="detail-block fold"><summary><span class="fold-name">Admissible · 27</span><span class="fold-prev">go to armchair 1, go to bed 1, go to drawer 1, …</span></summary><div class="chip-row" style="margin-top:.45rem"><span class="chip mono"><mark class="hit ok">go to drawer 1</mark></span><span class="chip mono">…</span></div></details>
+        </div>
       </div>
-      <div>
-        <div class="h is-viol"><b>2</b><span>Checks at this step</span><em>2 failed · 1 can't tell</em></div>
-        <ol class="qas">
-          <li class="qa is-active" data-v="no">
-            <div class="qa-q"><span class="qa-verdict">NO</span><p>Could the environment run this command?</p></div>
-            <div class="qa-a">
-              <p>The command is wrapped in quotes, so it matches none of the 27 accepted commands.</p>
-              <div class="quotes2">
-                <div class="quote" data-src="agent"><span class="k">agent sent · S03</span><mark class="hl">'go to drawer 1'</mark></div>
-                <div class="quote" data-src="ok"><span class="k">accepted form</span>go to drawer 1</div>
-              </div>
-            </div>
-            <details class="full qa-more"><summary>technical details</summary><dl><dt>rule</dt><dd>decision.applicability/v1</dd><dt>reason</dt><dd>explicit_contract_mismatch</dd><dt>facts</dt><dd><span class="fid">f41</span> <span class="fid">f42</span></dd></dl></details>
-          </li>
-          <li class="qa" data-v="no">
-            <div class="qa-q"><span class="qa-verdict">NO</span><p>Did the previous action (<span class="stepno">S02</span>) change anything?</p></div>
-            <div class="qa-a">
-              <div class="quotes2">
-                <div class="quote" data-src="agent"><span class="k">agent sent · S02</span>'look'</div>
-                <div class="quote" data-src="env"><span class="k">environment replied · S03</span><mark class="hl env">Nothing happens.</mark></div>
-              </div>
-              <p class="v-caveat">This records what happened, not whose fault it is.</p>
-            </div>
-            <details class="full qa-more"><summary>technical details</summary><dl><dt>rule</dt><dd>execution.result/v1</dd><dt>reason</dt><dd>explicit_no_effect_not_responsibility_judgment</dd><dt>facts</dt><dd><span class="fid">f34</span> <span class="fid">f36</span></dd></dl></details>
-          </li>
-          <li class="qa" data-v="unk">
-            <div class="qa-q"><span class="qa-verdict">CAN'T TELL</span><p>Did this step move the task forward?</p></div>
-            <div class="qa-a"><p class="k">The action differs from the previous one, so repetition can't be compared.</p></div>
-          </li>
-        </ol>
-        <p class="hover-note">悬停 / 点击一个问题：左侧对应的原文高亮加深，其余高亮变淡；连到收起卡片上的箭头浮层时，同一问题也被选中。</p>
-      </div>
-    </div>
-  </article>
+    </article>
+  </div></div></section>
 </section>
 
-<!-- ================= SHARED ================= -->
-<section class="opt" id="shared">
-  <div class="opt-head"><h2>共用：收起卡片与箭头浮层</h2><span class="tag">三个方案都适用</span></div>
-  <div class="notes">
-    <p>收起卡片上 <b>“⚠ 2 violated” → 具体的问题名</b>（Not accepted / No effect），一眼看出是哪类问题。箭头浮层改为同一套文案：问题名 + 一句话 + 发生在哪一步；fact 编号只在 pin 之后的 technical details 里出现。</p>
-  </div>
-  <div class="shared">
+<!-- ======================= SHARED ======================= -->
+<section class="mk-sec" id="shared">
+  <div class="traj-head"><div><div class="eyebrow">Shared · 三个方案通用</div><h2>收起卡片与箭头浮层</h2></div></div>
+  <div class="mk-notes"><p>收起卡片底部的 “⚠ 2 violated” 换成<b>具体问题名</b>；箭头浮层沿用原样式，但每行改为“问题名 + 一句话 + 步号”，fact chip 只在 pin 后的 Rule details 里出现。</p></div>
+  <div class="mk-row">
     <div>
-      <div class="k">before</div>
-      <div class="lane">
-        <div class="mini before is-viol"><span class="k">S03</span><h3>go to drawer 1</h3><p>I expect to either find the keychain…</p><span class="pill" style="border-color:var(--warn-line);color:var(--warn-ink)">⚠ 2 violated</span><span class="pill">7 facts</span></div>
+      <div class="eyebrow" style="margin-bottom:.4rem">before</div>
+      <div class="lane-track">
+        <article class="st-card has-violation"><div class="card-meta"><div class="card-top"><span class="mono card-idx">S03</span><button class="card-toggle" type="button">+</button></div><span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg></span><h3 class="card-title">go to drawer 1</h3><p class="card-sub">- What do I expect this action to achieve? I expect to either find the…</p><div class="card-foot"><span class="badge warn">⚠ 2 violated</span><span class="badge">7 facts</span></div></div></article>
       </div>
-      <div class="k">after</div>
-      <div class="lane">
-        <div class="mini is-viol"><span class="k">S02</span><h3>look</h3><p>I expect to gather information…</p><span class="pill viol">⚠ Not accepted</span><span class="pill">6 facts</span></div>
-        <div class="mini is-viol"><span class="arrow">!</span><span class="k">S03</span><h3>go to drawer 1</h3><p>I expect to either find the keychain…</p><span class="pill viol">⚠ Not accepted</span><span class="pill viol">⚠ No effect</span><span class="pill">7 facts</span></div>
+      <div class="eyebrow" style="margin:1rem 0 .4rem">after</div>
+      <div class="lane-track">
+        <article class="st-card has-violation"><div class="card-meta"><div class="card-top"><span class="mono card-idx">S02</span><button class="card-toggle" type="button">+</button></div><span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg></span><h3 class="card-title">look</h3><p class="card-sub">I expect to gather information about potential locations…</p><div class="card-foot"><span class="badge cand">plan</span><span class="badge anchor">anchor c1</span><span class="badge warn">⚠ Not accepted</span><span class="badge">6 facts</span></div></div></article>
+        <article class="st-card has-violation"><button class="step-arrow is-warn is-pinned" type="button">→</button><div class="card-meta"><div class="card-top"><span class="mono card-idx">S03</span><button class="card-toggle" type="button">+</button></div><span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg></span><h3 class="card-title">go to drawer 1</h3><p class="card-sub">I expect to either find the keychain or gather clues…</p><div class="card-foot"><span class="badge warn">⚠ Not accepted</span><span class="badge warn">⚠ No effect</span><span class="badge">7 facts</span></div></div></article>
       </div>
     </div>
     <div>
-      <div class="k">arrow popover · → S03</div>
-      <div class="popv">
-        <div class="pop-head"><span class="mono">→ S03</span><span class="pill viol">2 problems</span><span class="pill undec">1 can't tell</span></div>
-        <ol>
-          <li><div class="row"><b>Command not accepted</b><span class="where">S03 · action</span></div><p><code><mark class="hl">'go to drawer 1'</mark></code> is quoted; the accepted form is <code>go to drawer 1</code>.</p></li>
-          <li><div class="row"><b>Previous action had no effect</b><span class="where">S02 → S03</span></div><p><code>'look'</code> → <mark class="hl env">Nothing happens.</mark></p></li>
+      <div class="eyebrow" style="margin-bottom:.4rem">arrow popover · before → after</div>
+      <div class="arrow-pop" style="margin-bottom:.8rem; opacity:.8">
+        <div class="pop-head"><span class="mono">→ S03</span><span class="chip-row"><span class="badge bad">violated 2</span><span class="badge warn">unknown 1</span></span></div>
+        <ol class="pop-rules"><li><div class="pop-rule"><span class="mono">decision.applicability/v1</span><span class="muted">explicit_contract_mismatch</span></div><div class="chip-col"><span class="fact-chip side-mind"><span class="mono fid">f41</span><span class="fact-text">go(drawer:1) = go to drawer 1</span></span><span class="fact-chip side-env"><span class="mono fid">f42</span><span class="fact-text">admissibility(int:i3) = quoted</span></span></div></li></ol>
+        <p class="pop-foot">Click the arrow to pin</p>
+      </div>
+      <div class="arrow-pop is-pinned">
+        <div class="pop-head"><span class="mono">→ S03</span><span class="chip-row"><span class="badge bad">2 problems</span><span class="badge warn">1 can't tell</span></span></div>
+        <ol class="pop-rules">
+          <li><div class="pop-rule"><strong>Command not accepted</strong><span class="step-chip">S03</span></div><p><code><mark class="hit">'go to drawer 1'</mark></code> is quoted; accepted form <code><mark class="hit ok">go to drawer 1</mark></code>.</p></li>
+          <li><div class="pop-rule"><strong>Previous action had no effect</strong><span class="step-chip">S02</span></div><p><code>'look'</code> → <mark class="hit env">Nothing happens.</mark></p></li>
         </ol>
-        <p class="foot">Click the arrow to pin · pinned view adds technical details</p>
+        <p class="pop-foot">Pinned · Rule details (rule IDs, facts) below each item</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ================= WORDING ================= -->
-<section class="opt" id="words">
-  <div class="opt-head"><h2>规则文案表</h2><span class="tag">覆盖现有数据中全部 violated 组合</span></div>
-  <div class="notes"><p>统计 data/runs 下所有 evaluations：violated 只有下面 3 种组合（规则 + 引用 fact 的取值），可以用模板完整覆盖；unknown 只需要一句 “Can't tell: …”。文案由 rule + 引用 fact 的 <code>rel/value/span</code> 填充。</p></div>
-  <table class="words">
-    <thead><tr><th>rule · reason · fact</th><th>标题</th><th>一句话（模板）</th><th>次数</th></tr></thead>
+<!-- ======================= WORDING ======================= -->
+<section class="mk-sec" id="words">
+  <div class="traj-head"><div><div class="eyebrow">Wording</div><h2>规则文案表</h2></div></div>
+  <div class="mk-notes"><p>data/runs 下所有 evaluations 中，violated 只有 3 种组合，可用模板完整覆盖；文案由规则 + 引用 fact 的 <code>value / span</code> 填充。unknown 一律写成 “Can't tell: …” 并默认折叠。</p></div>
+  <div class="detail-block tone-plain" style="overflow-x:auto">
+  <table class="mk-words">
+    <thead><tr><th>rule · reason · cited fact</th><th>标题</th><th>一句话（模板）</th><th>次数</th></tr></thead>
     <tbody>
-      <tr><td>decision.applicability/v1 · explicit_contract_mismatch · admissibility = quoted</td><td><b>Command not accepted</b></td><td>The agent wrapped its command in quotes, so it matches none of the commands the environment accepts. Accepted form: <code>{span without quotes}</code> (if present in the admissible list).</td><td>30</td></tr>
-      <tr><td>decision.applicability/v1 · explicit_contract_mismatch · admissibility = not_admissible</td><td><b>Command not accepted</b></td><td><code>{span}</code> is not one of the commands the environment accepts at this step. (+ closest admissible command, if any)</td><td>10</td></tr>
-      <tr><td>execution.result/v1 · explicit_no_effect_not_responsibility_judgment · effect = none</td><td><b>Action had no effect</b></td><td>{step}'s command <code>{action span}</code> changed nothing: the environment replied “{obs span}”. <i>Note: records what happened, not whose fault it is.</i></td><td>38</td></tr>
-      <tr><td>progress.efficiency/v1 · unknown · non_equivalent_action</td><td><b class="u">Made progress? Can't tell</b></td><td>The action differs from the previous one, so repetition can't be compared.</td><td>146</td></tr>
-      <tr><td>execution.result/v1 · unknown · missing_expected_effect_model</td><td><b class="u">Did it work? Can't tell</b></td><td>There is no model of what this action should do, so its result can't be checked.</td><td>138</td></tr>
-      <tr><td>其余 unknown（missing_* / unbound_* / parse_incomplete）</td><td><b class="u">Can't tell</b></td><td>Not enough recorded information to decide. 默认折叠为 “N undecided”。</td><td>—</td></tr>
+      <tr><td>decision.applicability/v1 · explicit_contract_mismatch · admissibility = quoted</td><td><span class="badge bad">Command not accepted</span></td><td>The agent wrapped its command in quotes, so it matches none of the commands the environment accepts. Accepted form: <code>{span without quotes}</code>（若在 admissible 列表中）</td><td>30</td></tr>
+      <tr><td>decision.applicability/v1 · explicit_contract_mismatch · admissibility = not_admissible</td><td><span class="badge bad">Command not accepted</span></td><td><code>{span}</code> is not one of the commands the environment accepts at this step.（+ 最接近的 admissible 命令）</td><td>10</td></tr>
+      <tr><td>execution.result/v1 · explicit_no_effect_not_responsibility_judgment · effect = none</td><td><span class="badge bad">Action had no effect</span></td><td>{step}'s command <code>{action span}</code> changed nothing: the environment replied “{obs span}”. Note: records what happened, not whose fault it is.</td><td>38</td></tr>
+      <tr><td>progress.efficiency/v1 · non_equivalent_action</td><td><span class="badge warn">Made progress? Can't tell</span></td><td>The action differs from the previous one, so repetition can't be compared.</td><td>146</td></tr>
+      <tr><td>execution.result/v1 · missing_expected_effect_model</td><td><span class="badge warn">Did it work? Can't tell</span></td><td>There is no model of what this action should do, so its result can't be checked.</td><td>138</td></tr>
+      <tr><td>其余 unknown（missing_* / unbound_* / parse_incomplete）</td><td><span class="badge warn">Can't tell</span></td><td>Not enough recorded information to decide.</td><td>—</td></tr>
     </tbody>
   </table>
+  </div>
 </section>
 
 </div>
@@ -537,13 +397,10 @@ Plan — I expect to either find the keychain or gather clues about its whereabo
     document.documentElement.dataset.theme = t;
     try { localStorage.setItem("pd-theme", t); } catch (e) {}
   });
-  document.querySelectorAll(".jump[data-to]").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("[data-to]").forEach(b => b.addEventListener("click", () => {
     const el = document.getElementById(b.dataset.to);
     el.scrollIntoView({behavior: "smooth", block: "center"});
-    el.animate([{boxShadow: "0 0 0 3px var(--viol)"}, {boxShadow: "0 0 0 0 transparent"}], {duration: 900});
-  }));
-  document.querySelectorAll(".qa").forEach(q => q.addEventListener("mouseenter", () => {
-    q.parentElement.querySelectorAll(".qa").forEach(x => x.classList.toggle("is-active", x === q));
+    el.animate([{boxShadow: "0 0 0 3px var(--bad-line)"}, {boxShadow: "0 0 0 0 transparent"}], {duration: 900});
   }));
 </script>
 </body>
