@@ -1,7 +1,7 @@
 // Case workbench: summary header, phase strip and lazily mounted views.
 import {CaseStore} from "../case/store.js?v=27bf1baa85";
 import {CALL_PHASES} from "../case/calls.js?v=27bf1baa85";
-import {createCaseViews, TABS} from "../case/views.js?v=27bf1baa85";
+import {createCaseViews, TABS} from "../case/views.js?v=links-61e40abb21";
 import {caseHref} from "../routes.js?v=27bf1baa85";
 import {esc, loader, number, statusBadge} from "../util.js?v=27bf1baa85";
 

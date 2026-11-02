@@ -1,7 +1,7 @@
 // Home page: a light, business-style overview with its own header. In-page links scroll
 // instead of changing the hash, which belongs to the router.
 import {CaseStore} from "../case/store.js?v=27bf1baa85";
-import {createCaseViews, TABS} from "../case/views.js?v=27bf1baa85";
+import {createCaseViews, TABS} from "../case/views.js?v=links-61e40abb21";
 import {caseHref} from "../routes.js?v=27bf1baa85";
 import {domainIcon} from "./runs.js?v=27bf1baa85";
 import {esc, loader} from "../util.js?v=27bf1baa85";
