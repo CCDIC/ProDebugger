@@ -3,17 +3,17 @@
 // to the steps it touched.
 import {getJSON} from "../api.js?v=27bf1baa85";
 import {EVAL_CLASS, factChip, factText, icon} from "../case/format.js?v=27bf1baa85";
-import {callFindings, worstVerdict} from "../case/findings.js?v=917c5a06bc";
 import {actionLabel, ROLE_LABEL, stepRoles} from "../case/roles.js?v=27bf1baa85";
 import {esc, pretty, short} from "../util.js?v=27bf1baa85";
 import {callDetail, expandable, handoffHtml, layoutPhases, layoutProcess, overviewHtml, phaseDetail, processHtml, requestHtml} from "./process.js?v=27bf1baa85";
 import {anchorsByStep, anchorTitle} from "./route.js?v=27bf1baa85";
 import {candidateCard, candidatesByStep, planOf} from "./trace.js?v=27bf1baa85";
+import {anchorCopy} from "./anchor-copy.js?v=readable-step-inspector-20261102";
 
 export function createView(root, ctx) {
   const state = {
     model: null, sel: null, selPhase: null, openPhases: new Set(), hover: null, openStep: null, selStep: null, hoverStep: null,
-    arrowPin: null, arrowHover: null, arrowMuted: null,
+    arrowPin: null, arrowHover: null, arrowMuted: null, stepSection: "facts", stepAnchor: null,
     requests: new Map(), phases: [], layout: null, bodyScroll: new Map(),
   };
   root.innerHTML = `
@@ -32,13 +32,12 @@ export function createView(root, ctx) {
       <div class="lane-gap" aria-hidden="true"></div>
       <section class="lane lane-steps" aria-label="Agent steps">
         <div class="lane-label"><span class="eyebrow">Agent</span><span id="tj-step-count" class="lane-count"></span><span class="lane-nav"><button class="btn" data-pan="tj-steps" data-dir="-1" aria-label="Scroll agent lane left">←</button><button class="btn" data-pan="tj-steps" data-dir="1" aria-label="Scroll agent lane right">→</button></span></div>
-        <div class="lane-overview" id="tj-step-overview"></div>
+        <div class="lane-overview" id="tj-step-overview" role="group" aria-label="Step overview: red marks the selected root cause; gray marks all other steps"></div>
         <div class="lane-scroll" id="tj-steps" tabindex="0"><div class="lane-track" id="tj-step-track"></div></div>
       </section>
       <svg class="lane-links" id="tj-links" aria-hidden="true"></svg>
     </div>
-    <div class="arrow-pop" id="tj-arrow-pop" role="tooltip" hidden></div>
-    <div class="arrow-pop link-pop" id="tj-link-pop" role="tooltip" hidden></div>`;
+    <div class="arrow-pop" id="tj-arrow-pop" role="tooltip" hidden></div>`;
   const $ = id => root.querySelector("#" + id);
   const graph = $("tj-graph"), side = $("tj-side"), steps = $("tj-steps"), lanes = $("tj-lanes");
 
@@ -84,7 +83,7 @@ export function createView(root, ctx) {
     $("tj-proc").hidden = !d;
     root.querySelector(".lane-gap").hidden = !d;
     if (!d) {
-      $("tj-hint").textContent = "Compiled session: no debugger run yet. Open a step to inspect its roles, facts and rule evaluations.";
+      $("tj-hint").textContent = "Compiled session: no debugger run yet. Click a step's facts or rule-check button to inspect its records.";
       return;
     }
     state.phases = layoutPhases(d.calls, d.parse, planFor(d));
@@ -253,15 +252,89 @@ export function createView(root, ctx) {
     return `<article class="${cls}" data-step="${t}">
       ${i ? `<button class="step-arrow ${violated ? "is-warn" : ""}" data-arrow="${t}" aria-label="Rules at S${String(t).padStart(2, "0")}" aria-expanded="${state.arrowPin === t}">→</button>` : ""}
       <div class="card-meta">
-        <div class="card-top"><span class="mono card-idx">S${String(t).padStart(2, "0")}</span><button class="card-toggle" data-toggle-step="${t}" aria-expanded="${open}" aria-label="${open ? "Collapse" : "Expand"} step">${open ? "−" : "+"}</button></div>
+        <div class="card-top"><span class="mono card-idx">S${String(t).padStart(2, "0")}</span></div>
         <span class="card-icon">${icon("step")}</span>
         <h3 class="card-title" title="${esc(label)}">${esc(short(label, open ? 120 : 34))}</h3>
         <p class="card-sub">${esc(short(typeof thought === "string" ? thought.split("\n").filter(Boolean).at(-1) : "", open ? 160 : 60))}</p>
-        <div class="card-foot">${(idx.candidates.get(t) || []).map(c => `<span class="badge cand ${c.is_root_cause === false ? "not-root" : ""}" title="TRACE ${esc(c.caseId || "")}: ${esc(c.status)} ${esc(c.fault_class || "")}${c.is_root_cause === false ? " (not the root cause)" : ""}">${esc(c.module)}</span>`).join("")}${(idx.anchors.get(t) || []).map(c => `<span class="badge anchor" title="${esc(anchorTitle(c))}">anchor ${esc(c.candidate_id)}</span>`).join("")}${idx.gaps.has(t) ? '<span class="badge gap" title="The parser could not account for part of the source text at this step">parse gap</span>' : ""}${violated ? `<span class="badge warn">⚠ ${violated} violated</span>` : ""}<span class="badge">${(idx.facts.get(t) || []).length} facts</span></div>
+        <div class="card-foot step-actions">${(idx.anchors.get(t) || []).map(c => stepButton(t, "anchor", `anchor ${c.candidate_id}`, "anchor", open, c.candidate_id, anchorTitle(c))).join("")}${idx.gaps.has(t) ? '<span class="badge gap" title="The parser could not account for part of the source text at this step">parse gap</span>' : ""}${violated ? stepButton(t, "violated", `⚠ ${violated} violated`, "warn", open, null, "See which automatic rule checks failed and the facts they cite") : ""}${stepButton(t, "facts", `${(idx.facts.get(t) || []).length} facts`, "", open, null, "See the structured records extracted from this step")}</div>
         ${state.model.debugger ? `<div class="heat" title="${refs} model calls touched this step"><span style="width:${Math.round(100 * refs / idx.maxRefs)}%"></span></div>` : ""}
       </div>
-      ${open ? stepDetail(step, roles, idx) : ""}
+      ${open ? stepSectionDetail(step, roles, idx, t) : ""}
     </article>`;
+  }
+
+  function stepButton(t, section, label, tone, open, anchor = null, hint = "") {
+    const active = open && state.stepSection === section && (section !== "anchor" || state.stepAnchor === anchor);
+    return `<button type="button" class="badge step-info-button ${tone}${active ? " is-active" : ""}" data-step-section="${section}" data-step-target="${t}"${anchor == null ? "" : ` data-anchor-id="${esc(anchor)}"`} aria-expanded="${active}"${open ? ` aria-controls="step-info-${t}"` : ""} title="${esc(hint)}">${esc(label)}<span aria-hidden="true">${active ? "⌄" : "›"}</span></button>`;
+  }
+
+  function stepSectionDetail(step, roles, idx, t) {
+    const section = state.stepSection;
+    const factCount = (idx.facts.get(t) || []).length;
+    const titles = {anchor: "Why check this step?", violated: "Rule checks", facts: `${factCount} fact${factCount === 1 ? "" : "s"} extracted from this step`};
+    const failed = (idx.evals.get(t) || []).filter(e => e.state === "violated");
+    let body = "";
+    if (section === "anchor") {
+      const anchors = (idx.anchors.get(t) || []).filter(c => state.stepAnchor == null || c.candidate_id === state.stepAnchor);
+      body = anchors.map(c => anchorRows(c, roles)).join("") || '<p class="muted">No anchor is recorded for this step.</p>';
+    } else if (section === "violated") {
+      const names = {"assertion.consistency": "Claims match observations", "assertion.grounding": "Claims have supporting evidence", "information.update": "Remembered information is up to date", "decision.applicability": "Action meets execution constraints", "execution.result": "Action and feedback are consistent", "completion.consistency": "Completion claim matches task requirements", "progress.efficiency": "Action makes observable progress"};
+      const reasons = {explicit_contract_mismatch: "Execution constraint mismatch", explicit_no_effect_not_responsibility_judgment: "Feedback reports no effect"};
+      const refs = [...new Set(failed.flatMap(e => e.refs || []))];
+      body = failed.length ? `<div class="step-rule-block"><table class="step-rule-table"><thead><tr><th scope="col">Check</th><th scope="col">Result</th><th scope="col">Recorded reason</th></tr></thead><tbody>${failed.map(e => {
+        const reason = e.details?.reason;
+        const reasonText = typeof reason === "string" ? reasons[reason] || reason.replace(/_/g, " ") : "No reason was recorded.";
+        return `<tr><td><strong>${esc(names[String(e.rule).replace(/\/v\d+$/, "")] || e.rule)}</strong><code class="rule-code">${esc(e.rule)}</code></td><td><span class="step-rule-failed">Failed</span></td><td>${esc(reasonText)}${typeof reason === "string" ? `<code class="rule-code">${esc(reason)}</code>` : ""}${failed.length > 1 && e.refs?.length ? `<span class="rule-row-refs">Facts: ${e.refs.map(factLink).join(" ")}</span>` : ""}</td></tr>`;
+      }).join("")}</tbody></table><div class="step-rule-footer"><span>Action: <code>${esc(actionLabel(roles) || "No action recorded")}</code></span><span>Referenced facts: ${refs.map(factLink).join(" ") || "None recorded"}</span></div></div>` : '<p class="muted">No failed checks are recorded for this step.</p>';
+    } else {
+      const modules = {mem: "Memory", refl: "Reflection", plan: "Plan", act: "Action", chk: "Execution check", obs: "Observation"};
+      body = (idx.facts.get(t) || []).map(f => `<details class="step-fact-row"><summary><span class="step-fact-id mono">f${esc(f.fid)}</span><span class="step-fact-name">${esc(f.rel || "Unspecified relation")}</span><span class="step-fact-module">${esc(modules[f.slot] || f.slot || "Unspecified module")}</span></summary><div class="step-fact-source"><pre>${esc(f.span || "No source quotation recorded.")}</pre><button type="button" class="step-evidence-link" data-fid="${esc(f.fid)}">View linked fact in DSL Graph ↗</button></div></details>`).join("") || '<p class="muted">No extracted facts are recorded for this step.</p>';
+    }
+    const anchorId = section === "anchor" ? `Anchor ${state.stepAnchor || ""} · Step ${t}` : section === "facts" ? `S${String(t).padStart(2, "0")} · Compiled records` : `Step ${t}`;
+    return `<section class="step-info-panel is-${section}" id="step-info-${t}" aria-label="${esc(titles[section])}"><header><div><div class="step-panel-eyebrow">${esc(anchorId)}</div><h3>${esc(titles[section])}${section === "violated" ? `<span class="step-check-count">${failed.length} check${failed.length === 1 ? "" : "s"} failed</span>` : ""}</h3></div><button type="button" class="btn" data-close-step="${t}">Close</button></header>${section === "facts" ? '<p class="step-info-explanation">A fact is a structured record extracted from the log. It can describe an observation or an agent claim; extraction does not make the claim true. Open a row to read its source.</p>' : ""}<div class="step-info-records">${body}</div></section>`;
+  }
+
+  function factLink(fid) {
+    const fact = state.model.dsl?.factsById.get(fid);
+    return `<button type="button" class="step-evidence-link mono" data-fid="${esc(fid)}" title="${esc(fact?.span || "Open the original fact")}">f${esc(fid)}</button>`;
+  }
+
+  function emphasize(text, phrases = []) {
+    // Split plain text first so emphasis can never turn source text into HTML.
+    let pieces = [{text: String(text), strong: false}];
+    for (const phrase of phrases.filter(Boolean)) {
+      pieces = pieces.flatMap(part => part.strong ? [part] : part.text.split(phrase).flatMap((s, i) => [...(i ? [{text: phrase, strong: true}] : []), {text: s, strong: false}]));
+    }
+    return pieces.map(p => p.strong ? `<strong>${esc(p.text)}</strong>` : esc(p.text)).join("");
+  }
+
+  function sourceDisclosure(label, fields) {
+    if (!fields.length) return "";
+    return `<details class="anchor-source"><summary>${esc(label)}</summary>${fields.map(f => `<pre>${esc(typeof f.value === "string" ? f.value : pretty(f.value))}</pre>`).join("")}</details>`;
+  }
+
+  function anchorRows(anchor, roles) {
+    const copy = anchorCopy(anchor, roles);
+    const command = roles.action.map(f => typeof f.value === "string" ? f.value : pretty(f.value)).join("\n");
+    const response = roles.outcome.map(f => typeof f.value === "string" ? f.value : pretty(f.value)).join("\n");
+    const noEffect = /^Nothing happens\.?$/i.test(response.trim());
+    const quoted = command.match(/^(['"])([\s\S]*)\1$/);
+    const commandHtml = quoted ? `<span class="anchor-quote">${esc(quoted[1])}</span>${esc(quoted[2])}<span class="anchor-quote">${esc(quoted[1])}</span>` : esc(command);
+    const planFields = roles.reasoning.filter(f => /plan|intent/i.test(f.key));
+    return `<ol class="step-anchor-summary" data-copy-origin="${copy.reviewed ? "reviewed-hypothesis" : "source-record"}">
+      <li><span class="anchor-number">1</span><div><h4>What it wanted to do</h4><p>${copy.intent ? emphasize(short(copy.intent, 300), copy.intentEmphasis) : "No intended next action is recorded for this step."}</p>${copy.intentIsQuote ? sourceDisclosure("View full plan", planFields) : ""}</div></li>
+      <li><span class="anchor-number">2</span><div><h4>${noEffect ? "What happened instead" : "What happened"}</h4><p class="anchor-action-response">${command ? `<span>It sent <mark class="anchor-command"><code>${commandHtml}</code></mark></span>` : '<span class="muted">No action recorded.</span>'}<span class="anchor-result-arrow" aria-hidden="true">→</span>${response ? `<mark class="anchor-response${noEffect ? " has-no-effect" : ""}"><code>${esc(response)}</code></mark>` : '<span class="muted">No following feedback was recorded.</span>'}</p>${noEffect ? '<p class="anchor-outcome-meaning">The environment reported no visible effect.</p>' : ""}<div class="anchor-source-links">${sourceDisclosure("View command", roles.action)}${sourceDisclosure("View response", roles.outcome)}</div></div></li>
+      <li><span class="anchor-number">3</span><div><h4>Why it is worth checking</h4>${copy.question ? `<p>${emphasize(copy.question, copy.emphasis)}</p>` : `<p>No short investigation question is recorded for this lead.</p>${copy.hypothesis ? sourceDisclosure("View the recorded investigation note", [{value: copy.hypothesis}]) : ""}`}</div></li>
+    </ol>`;
+  }
+
+  function openStepSection(t, section, anchor = null) {
+    state.openStep = state.openStep === t && state.stepSection === section && state.stepAnchor === anchor ? null : t;
+    state.stepSection = section; state.stepAnchor = anchor; state.selStep = t;
+    render();
+    const card = steps.querySelector(`[data-step="${t}"]`);
+    scrollToCard(steps, card);
+    [...card.querySelectorAll("[data-step-section]")].find(b => b.dataset.stepSection === section && (b.dataset.anchorId || null) === anchor)?.focus({preventScroll: true});
   }
 
   function renderSteps() {
@@ -269,12 +342,12 @@ export function createView(root, ctx) {
     const list = state.model.steps;
     $("tj-step-track").innerHTML = list.map((s, i) => stepCard(s, i, idx)).join("") || `<p class="empty lane-empty">No steps recorded.</p>`;
     $("tj-step-count").textContent = `${list.length} steps`;
+    const rootStep = state.model.debugger?.result?.root?.step;
     $("tj-step-overview").innerHTML = list.map((s, i) => {
       const t = s.t ?? i + 1;
-      const violated = (idx.evals.get(t) || []).some(e => e.state === "violated");
-      const heat = (idx.refs.get(t)?.length || 0) / idx.maxRefs;
-      const marks = [violated && "is-warn", idx.gaps.has(t) && "has-gap", idx.anchors.has(t) && "is-anchor", idx.candidates.has(t) && "is-candidate"].filter(Boolean).join(" ");
-      return `<button class="tick step-tick ${marks}" style="--heat:${heat.toFixed(2)}" data-jump-step="${t}" title="S${t}${idx.anchors.has(t) ? " · anchor" : ""}${idx.gaps.has(t) ? " · parse gap" : ""}"></button>`;
+      const isRoot = rootStep != null && Number(rootStep) === Number(t);
+      const label = `S${String(t).padStart(2, "0")}${isRoot ? " · Root cause (selected diagnosis)" : ""}`;
+      return `<button class="tick step-tick${isRoot ? " is-root" : ""}" data-jump-step="${t}" title="${esc(label)}" aria-label="${esc(label)}"></button>`;
     }).join("");
   }
 
@@ -350,46 +423,6 @@ export function createView(root, ctx) {
     return {x: cx - base.left, top: r.top - base.top, bottom: Math.min(bottom, s.bottom) - base.top, off};
   }
 
-  // A selected call links to each step it concluded something about, the curve weighted and
-  // coloured by its strongest verdict and tagged with a badge where it lands; the steps it only
-  // read fold into one bracket per run of neighbours. Hovering a curve, badge or bracket opens
-  // what the call found there (linkPopHtml).
-  const findingsOf = c => callFindings(c, state.model.dsl?.factsById);
-  const curve = (a, y1, b, y2) => { const mid = (y1 + y2) / 2; return `M${a},${y1} C${a},${mid} ${b},${mid} ${b},${y2}`; };
-  const BADGE_CH = 6.6;
-
-  function linkHtml(c, t, a, b, verdict, cls, badge) {
-    const key = `${c.index}:${t}`, d = curve(a.x, a.bottom, b.x, b.top);
-    const list = findingsOf(c).get(t) || [];
-    const text = badge && list.length ? `${list[0].subject} ${list[0].word}${list.length > 1 ? ` +${list.length - 1}` : ""}` : "";
-    const w = text.length * BADGE_CH + 12;
-    // Badges sit in the gap above the agent lane, clear of its labels and step ticks.
-    const by = Math.min(b.top - 27, root.querySelector(".lane-steps").getBoundingClientRect().top - lanes.getBoundingClientRect().top - 24);
-    return `<path class="link v-${verdict} phase-${c.phase} ${cls}" d="${d}"/><circle class="link-end v-${verdict} phase-${c.phase}" cx="${b.x}" cy="${b.top}" r="3.5"/>
-      <path class="link-hit" data-link="${key}" d="${d}"/>
-      ${text ? `<g class="link-badge v-${verdict} phase-${c.phase}" data-link="${key}"><rect x="${b.x - w / 2}" y="${by}" width="${w}" height="18" rx="4"/><text x="${b.x}" y="${by + 12.5}" text-anchor="middle">${esc(text)}</text></g>` : ""}`;
-  }
-
-  // Consecutive read-only steps (in lane order) share one bracket over their cards.
-  function bracketHtml(c, run, a, base, cls) {
-    const s = steps.getBoundingClientRect();
-    const first = steps.querySelector(`[data-step="${run[0]}"]`)?.getBoundingClientRect(), last = steps.querySelector(`[data-step="${run.at(-1)}"]`)?.getBoundingClientRect();
-    if (!first || !last) return "";
-    // A run scrolled out of the lane keeps a faint curve to the edge it lies beyond.
-    if (last.right < s.left || first.left > s.right) {
-      const x = (last.right < s.left ? s.left + 8 : s.right - 8) - base.left;
-      return `<path class="link v-read phase-${c.phase} is-off ${cls}" d="${curve(a.x, a.bottom, x, first.top - base.top)}"/>`;
-    }
-    const x1 = Math.max(first.left + 10, s.left + 4) - base.left, x2 = Math.min(last.right - 10, s.right - 4) - base.left;
-    if (x2 <= x1) return "";
-    const y = Math.min(first.top, root.querySelector(".lane-steps").getBoundingClientRect().top) - base.top - 8, cx = (x1 + x2) / 2, key = `read:${c.index}:${run[0]}:${run.at(-1)}`;
-    const label = run.length > 1 ? `read S${String(run[0]).padStart(2, "0")}–S${String(run.at(-1)).padStart(2, "0")}` : `read S${String(run[0]).padStart(2, "0")}`;
-    const d = curve(a.x, a.bottom, cx, y);
-    return `<path class="link v-read phase-${c.phase} ${cls}" d="${d}"/><path class="link-hit" data-link="${key}" d="${d}"/>
-      <g class="link-bracket phase-${c.phase}" data-link="${key}"><path d="M${x1},${y + 6} V${y} H${x2} V${y + 6}"/><rect class="link-bracket-hit" x="${x1}" y="${y - 14}" width="${x2 - x1}" height="20"/>
-        <text x="${cx}" y="${y - 4}" text-anchor="middle">${label}</text></g>`;
-  }
-
   function drawLinks() {
     const svg = $("tj-links");
     const base = lanes.getBoundingClientRect();
@@ -397,6 +430,7 @@ export function createView(root, ctx) {
     root.querySelectorAll(".is-linked").forEach(el => el.classList.remove("is-linked"));
     const d = state.model?.debugger;
     if (!d) { svg.innerHTML = ""; return; }
+    const pairs = [];
     const current = state.sel ?? (state.selPhase ? "phase:" + state.selPhase : null);
     const key = state.hover ?? (state.hoverStep == null ? current : null);
     const stepT = key == null ? (state.hoverStep ?? state.selStep) : null;
@@ -407,98 +441,23 @@ export function createView(root, ctx) {
       svg.innerHTML = "";
       return;
     }
-    const cls = state.hover != null || state.hoverStep != null ? "is-preview" : "";
-    // A call in a collapsed phase links from its phase card.
-    const anchor = c => {
-      const node = graph.querySelector(`.pnode[data-call="${c.index}"]`) || cardOf(c.phase);
-      if (!node) return null;
-      node.classList.add("is-linked");
-      const a = cardRect(node, graph, base);
-      return a.off ? null : a; // a node scrolled out of view would draw across the side panel
-    };
-    const stepAt = t => {
-      const st = steps.querySelector(`[data-step="${t}"]`);
-      if (!st) return null;
-      st.classList.add("is-linked");
-      return cardRect(st, steps, base);
-    };
-    let html = "";
-    const call = key != null ? callOf(key) : null;
-    if (call) {
-      const a = anchor(call);
-      if (a) {
-        const found = findingsOf(call);
-        const touched = new Set([...call.steps, ...found.keys()]);
-        const lane = state.model.steps.map((s, i) => s.t ?? i + 1);
-        const runs = [];
-        lane.forEach((t, i) => {
-          if (!touched.has(t)) return;
-          if (found.has(t)) {
-            const b = stepAt(t);
-            if (b) html += linkHtml(call, t, a, b, worstVerdict(found.get(t)), `${cls} ${b.off ? "is-off" : ""}`, !b.off);
-            return;
-          }
-          stepAt(t);
-          if (runs.length && runs.at(-1).at(-1) === lane[i - 1]) runs.at(-1).push(t);
-          else runs.push([t]);
-        });
-        html += runs.map(run => bracketHtml(call, run, a, base, cls)).join("");
-      }
-    } else if (stepT != null) {
-      // Every call that touched one step: one curve per node, weighted by what it found there. A
-      // collapsed card's curve stands for the call in it that drew the strongest verdict.
-      const b = stepAt(stepT);
-      const best = new Map();
-      if (b) (state.idx.refs.get(stepT) || []).forEach(i => {
-        const c = d.calls[i], id = graph.querySelector(`.pnode[data-call="${c.index}"]`) ? c.index : c.phase;
-        const verdict = worstVerdict(findingsOf(c).get(stepT)), had = best.get(id);
-        if (!had ? best.size < 80 : worstVerdict([{verdict}, {verdict: had.verdict}]) !== had.verdict) best.set(id, {c, verdict});
-      });
-      best.forEach(({c, verdict}) => {
-        const a = anchor(c);
-        if (a) html += linkHtml(c, stepT, a, b, verdict, `${cls} ${b.off ? "is-off" : ""}`, false);
-      });
-    }
-    svg.innerHTML = html;
+    if (key != null) callOf(key)?.steps.forEach(t => pairs.push([callOf(key), t]));
+    else if (stepT != null) (state.idx.refs.get(stepT) || []).forEach(i => pairs.push([d.calls[i], stepT]));
+    const transient = state.hover != null || state.hoverStep != null;
+    // A call in a collapsed phase links from its phase card: one curve per card and step.
+    const seen = new Set();
+    svg.innerHTML = pairs.map(([c, t]) => {
+      const node = graph.querySelector(`.pnode[data-call="${c.index}"]`) || cardOf(c.phase), st = steps.querySelector(`[data-step="${t}"]`);
+      const id = `${node?.dataset.call ?? c.phase}:${t}`;
+      if (!node || !st || seen.has(id) || seen.size >= 80) return "";
+      seen.add(id);
+      node.classList.add("is-linked"); st.classList.add("is-linked");
+      const a = cardRect(node, graph, base), b = cardRect(st, steps, base);
+      if (a.off) return ""; // a node scrolled out of view would draw across the side panel
+      const y1 = a.bottom, y2 = b.top, mid = (y1 + y2) / 2;
+      return `<path class="link phase-${c.phase} ${b.off ? "is-off" : ""} ${transient ? "is-preview" : ""}" d="M${a.x},${y1} C${a.x},${mid} ${b.x},${mid} ${b.x},${y2}"/><circle class="link-end phase-${c.phase}" cx="${b.x}" cy="${y2}" r="3.5"/>`;
+    }).join("");
   }
-
-  // ---------- link popover ----------
-  const linkPop = $("tj-link-pop");
-  const VERDICT_CLASS = {viol: "bad", unk: "warn", sat: "ok", cand: "anchor", read: ""};
-
-  function linkPopHtml(key) {
-    const read = key.startsWith("read:");
-    const [ci, lo, hi] = (read ? key.slice(5) : key).split(":").map(Number);
-    const c = state.model?.debugger?.calls[ci];
-    if (!c) return "";
-    const tools = [...new Set(c.tools.map(t => t.name).filter(Boolean))].join(" · ") || "no tools";
-    const step = n => `S${String(n).padStart(2, "0")}`;
-    const head = `<div class="pop-head"><span class="mono">${esc(c.phase)} #${c.n} · ${esc(tools)}</span><span class="mono">→ ${read ? (lo === hi ? step(lo) : `${step(lo)}–${step(hi)}`) : step(lo)}</span></div>`;
-    if (read) return `${head}<p class="muted">Read only: this call drew no verdict on ${lo === hi ? "this step" : "these steps"}.</p>`;
-    const fact = fid => state.model.dsl?.factsById.get(fid);
-    const list = findingsOf(c).get(lo) || [];
-    if (!list.length) return `${head}<p class="muted">Read only: this call drew no verdict on this step.</p>`;
-    return `${head}<ol class="pop-rules">${list.map(f => {
-      const refs = f.cites.map(fact).filter(Boolean);
-      return `<li><div class="pop-rule"><span class="badge ${VERDICT_CLASS[f.verdict]}">${esc(f.word)}</span><span class="mono">${esc(f.subject || "")}</span></div>
-        ${f.reason ? `<p>${esc(short(String(f.reason), 260))}</p>` : ""}
-        ${refs.length ? `<div class="chip-col">${refs.slice(0, MAX_REFS).map(r => `<span class="fact-chip side-${esc(r.side)}"><span class="mono fid">f${r.fid}</span><span class="fact-text">${esc(short(factText(r), 70))}</span></span>`).join("")}${refs.length > MAX_REFS ? `<span class="muted">+${refs.length - MAX_REFS} more</span>` : ""}</div>` : ""}</li>`;
-    }).join("")}</ol>`;
-  }
-
-  function placeLinkPop(key, x, y) {
-    if (!key) { linkPop.hidden = true; linkPop.dataset.key = ""; return; }
-    if (linkPop.dataset.key !== key) { linkPop.innerHTML = linkPopHtml(key); linkPop.dataset.key = key; }
-    linkPop.hidden = !linkPop.innerHTML;
-    const w = linkPop.offsetWidth, h = linkPop.offsetHeight;
-    linkPop.style.left = `${Math.max(8, Math.min(innerWidth - w - 8, x + 14))}px`;
-    linkPop.style.top = `${y + 16 + h > innerHeight - 8 ? Math.max(8, y - h - 12) : y + 16}px`;
-  }
-  root.addEventListener("pointermove", event => {
-    const link = event.target.closest?.("[data-link]");
-    placeLinkPop(link?.dataset.link, event.clientX, event.clientY);
-  });
-
   let raf = 0;
   const scheduleLinks = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { drawLinks(); placePop(); }); };
 
@@ -549,6 +508,10 @@ export function createView(root, ctx) {
   root.addEventListener("click", async event => {
     const el = event.target;
     if (el.closest("#tj-side-toggle")) { setSideOpen(side.hidden); return; }
+    const info = el.closest("[data-step-section]");
+    if (info) { openStepSection(Number(info.dataset.stepTarget), info.dataset.stepSection, info.dataset.anchorId || null); return; }
+    const close = el.closest("[data-close-step]");
+    if (close) { openStepSection(Number(close.dataset.closeStep), state.stepSection, state.stepAnchor); return; }
     const arrow = el.closest("[data-arrow]")?.dataset.arrow;
     if (arrow != null) { clickArrow(Number(arrow)); return; }
     const fid = el.closest("[data-fid]")?.dataset.fid;
@@ -581,19 +544,9 @@ export function createView(root, ctx) {
     const b = el.closest("button");
     if (b?.dataset.pan) { $(b.dataset.pan).scrollBy({left: Number(b.dataset.dir) * steps.clientWidth * .8, behavior: "smooth"}); return; }
     if (b?.dataset.jumpStep) { selectStep(Number(b.dataset.jumpStep)); return; }
-    if (b?.dataset.toggleStep != null) {
-      const t = Number(b.dataset.toggleStep);
-      state.openStep = state.openStep === t ? null : t; state.selStep = t;
-      render(); scrollToCard(steps, steps.querySelector(`[data-step="${t}"]`)); return;
-    }
-    if (el.closest(".card-detail") || el.closest(".proc-side")) return;
+    if (el.closest(".card-detail, .step-info-panel") || el.closest(".proc-side")) return;
     const st = el.closest("[data-step]");
     if (st) selectStep(Number(st.dataset.step), false);
-  });
-
-  root.addEventListener("dblclick", event => {
-    if (event.target.closest(".card-detail, .step-arrow")) return;
-    event.target.closest("[data-step]")?.querySelector(".card-toggle")?.click();
   });
 
   root.addEventListener("pointerover", event => {
@@ -606,7 +559,7 @@ export function createView(root, ctx) {
     if (hn !== state.hover || hs !== state.hoverStep) { state.hover = hn; state.hoverStep = hs; scheduleLinks(); }
   });
   lanes.addEventListener("pointerleave", () => { state.hover = state.hoverStep = null; scheduleLinks(); });
-  root.addEventListener("pointerleave", () => { hoverArrow(null); placeLinkPop(null); });
+  root.addEventListener("pointerleave", () => hoverArrow(null));
 
   root.addEventListener("keydown", event => {
     if (event.key === "Escape") {
@@ -616,6 +569,7 @@ export function createView(root, ctx) {
       was.size ? morph(render, was) : render();
       return;
     }
+    if (event.target.closest("button, summary, a, input, textarea, select, .step-info-panel")) return;
     const lane = event.target.closest(".proc-view, .lane-scroll");
     const keys = lane === graph ? ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter"] : ["ArrowLeft", "ArrowRight", "Enter"];
     if (!lane || !keys.includes(event.key)) return;
@@ -642,7 +596,7 @@ export function createView(root, ctx) {
     } else {
       const ts = state.model.steps.map((s, i) => s.t ?? i + 1);
       const pos = ts.indexOf(state.selStep);
-      if (event.key === "Enter") { if (state.selStep != null) { state.openStep = state.openStep === state.selStep ? null : state.selStep; render(); } return; }
+      if (event.key === "Enter") { if (state.selStep != null) openStepSection(state.selStep, "facts"); return; }
       selectStep(ts[Math.max(0, Math.min(ts.length - 1, pos + (event.key === "ArrowRight" ? 1 : -1)))]);
     }
   });
