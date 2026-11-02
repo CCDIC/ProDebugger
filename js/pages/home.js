@@ -103,14 +103,11 @@ const SHOTS = [
 ];
 
 // The original GIF composition, packaged as a same-origin static interactive view.
-const CLOUD_PREVIEW = "./home-cloud.html?v=20261102-quick1";
-// The same cloud with the guided five-chapter panel, opened in a dialog from the hero.
-const QUICK_PREVIEW = "./home-cloud.html?mode=tour&v=20261102-quick1";
+const CLOUD_PREVIEW = "./home-cloud.html?v=20261030-compact2";
 
 function heroShots() {
   return `<div class="shot-frame">
-      <div class="shot-bar"><span class="demo-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="shot-caption"></span>
-        <button type="button" class="shot-quick" data-open-preview>${icon('<path d="m8 5 11 7-11 7z"/>')}Quick preview</button></div>
+      <div class="shot-bar"><span class="demo-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="shot-caption"></span></div>
       <div class="shot-stage">
         ${SHOTS.map(([id, label, caption, href]) => id === "trajectory"
           ? `<div class="shot" data-shot="${id}"><iframe src="${CLOUD_PREVIEW}" title="Interactive evidence cloud" style="display:block;width:100%;height:100%;border:0" loading="eager"></iframe></div>`
@@ -330,12 +327,6 @@ export function mountHome(root) {
       </footer>
 
       ${STATIC ? videoDialog() : ""}
-      <dialog class="preview-dialog" aria-label="Quick preview of the example case">
-        <div class="preview-dialog-bar"><strong>Quick preview</strong><span>What happened in this case, how ProDebugger traced it, and the suggested fix</span>
-          <a class="h-btn small" href="${CLOUD_CASE_HREF}" data-close-preview>Full Query Graph ${ARROW}</a>
-          <button type="button" class="h-btn small" data-close-preview>Close</button></div>
-        <div class="preview-dialog-frame"></div>
-      </dialog>
       <dialog class="diagram-dialog" aria-label="Technical diagram">
         <div class="diagram-bar"><strong>MAP → ROUTE → TRACE → SUBMIT · technical diagram</strong>
           <button type="button" class="h-btn small" data-close-diagram>Close</button></div>
@@ -358,28 +349,7 @@ export function mountHome(root) {
   // handled the same way, synchronously (the async "close" event can be coalesced).
   const closeVideo = () => { videoBox.close(); videoBox.querySelector(".video-frame").innerHTML = ""; };
   videoBox?.addEventListener("cancel", event => { event.preventDefault(); closeVideo(); });
-  // The quick preview loads on open and is emptied on close, so its render loop stops.
-  const previewBox = root.querySelector(".preview-dialog");
-  const openPreview = () => {
-    if (previewBox.open) return;
-    const frame = previewBox.querySelector(".preview-dialog-frame");
-    frame.innerHTML = `<iframe src="${QUICK_PREVIEW}" title="Quick preview: the example case, its evidence and the diagnosis"></iframe>`;
-    frame.querySelector("iframe").addEventListener("load", event => event.target.focus(), {once: true});
-    previewBox.showModal();
-  };
-  const closePreview = () => { previewBox.close(); previewBox.querySelector(".preview-dialog-frame").innerHTML = ""; };
-  previewBox.addEventListener("cancel", event => { event.preventDefault(); closePreview(); });
-  // The hero cloud's case card asks for the quick preview from inside its frame.
-  const heroFrame = root.querySelector(".hero-visual iframe");
-  const onMessage = event => {
-    if (event.origin !== location.origin) return;
-    if (event.source === heroFrame?.contentWindow && event.data?.type === "prodebugger:quick-preview") openPreview();
-    if (event.source === previewBox.querySelector("iframe")?.contentWindow && event.data?.type === "prodebugger:close-preview") closePreview();
-  };
-  window.addEventListener("message", onMessage);
   const onClick = event => {
-    if (event.target.closest("[data-open-preview]")) openPreview();
-    if (event.target.closest("[data-close-preview]") || event.target === previewBox) closePreview();
     const target = event.target.closest("[data-scroll]");
     if (target) root.querySelector("#" + target.dataset.scroll)?.scrollIntoView({behavior: "smooth", block: "start"});
     if (videoBox && event.target.closest("[data-open-video]")) { videoBox.showModal(); loadVideo(); }
@@ -414,5 +384,5 @@ export function mountHome(root) {
   nearDemo.observe(demoSection);
 
   window.scrollTo(0, 0);
-  return {unmount() { root.removeEventListener("click", onClick); window.removeEventListener("message", onMessage); nearDemo.disconnect(); reveal.disconnect(); demo?.destroy(); }};
+  return {unmount() { root.removeEventListener("click", onClick); nearDemo.disconnect(); reveal.disconnect(); demo?.destroy(); }};
 }
