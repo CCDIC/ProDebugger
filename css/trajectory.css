@@ -227,7 +227,16 @@
 .lane-links .link-bracket path { fill: none; stroke: var(--c, var(--amber)); stroke-width: 1.2; opacity: .6; }
 .lane-links .link-bracket-hit { fill: transparent; }
 .lane-links .link-bracket text { fill: var(--faint); font: 11px var(--mono); }
-.link-pop .pop-rules p { color: var(--text-2); }
+.link-pop .pop-insight { margin: .5rem 0 .1rem; color: var(--text-hi, var(--text)); font-size: .9rem; line-height: 1.45; }
+.link-pop .pop-rule .muted { flex-basis: 100%; }
+.link-pop .pop-facts { margin-top: .5rem; padding-top: .4rem; border-top: 1px solid var(--line); }
+.link-pop .pop-facts > summary { color: var(--faint); font: .74rem var(--mono); list-style: none; cursor: default; }
+.link-pop .pop-facts > summary::-webkit-details-marker { display: none; }
+.link-pop .pop-facts > summary::before { content: "▸ "; }
+.link-pop .pop-facts[open] > summary::before { content: "▾ "; }
+.link-pop.is-pinned .pop-facts > summary { cursor: pointer; }
+.link-pop.is-pinned .pop-facts > summary:hover { color: var(--text-2); }
+.link-pop .pop-facts .chip-col { margin-top: .4rem; }
 @keyframes link-flow { to { stroke-dashoffset: -22; } }
 
 @media (max-width: 1100px) { .step-detail { grid-template-columns: minmax(0, 1fr); } .st-card.is-open { grid-template-columns: minmax(0, 1fr); } .card-detail { border-left: 0; border-top: 1px solid var(--line); } }

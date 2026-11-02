@@ -3,7 +3,7 @@
 // to the steps it touched.
 import {getJSON} from "../api.js?v=27bf1baa85";
 import {EVAL_CLASS, factChip, factText, icon} from "../case/format.js?v=27bf1baa85";
-import {callFindings, worstVerdict} from "../case/findings.js?v=917c5a06bc";
+import {callFindings, insightFor, plainReason, worstVerdict} from "../case/findings.js?v=b596342864";
 import {actionLabel, ROLE_LABEL, stepRoles} from "../case/roles.js?v=27bf1baa85";
 import {esc, pretty, short} from "../util.js?v=27bf1baa85";
 import {callDetail, expandable, handoffHtml, layoutPhases, layoutProcess, overviewHtml, phaseDetail, processHtml, requestHtml} from "./process.js?v=27bf1baa85";
@@ -16,6 +16,7 @@ export function createView(root, ctx) {
     model: null, sel: null, selPhase: null, openPhases: new Set(), hover: null, openStep: null, selStep: null, hoverStep: null,
     arrowPin: null, arrowHover: null, arrowMuted: null, stepSection: "facts", stepAnchor: null,
     requests: new Map(), phases: [], layout: null, bodyScroll: new Map(),
+    linkPin: null,
   };
   root.innerHTML = `
     <div class="traj-head">
@@ -432,6 +433,7 @@ export function createView(root, ctx) {
   const findingsOf = c => callFindings(c, state.model.dsl?.factsById);
   const curve = (a, y1, b, y2) => { const mid = (y1 + y2) / 2; return `M${a},${y1} C${a},${mid} ${b},${mid} ${b},${y2}`; };
   const BADGE_CH = 6.6;
+  let badges = [];
 
   function linkHtml(c, t, a, b, verdict, cls, badge) {
     const key = `${c.index}:${t}`, d = curve(a.x, a.bottom, b.x, b.top);
@@ -440,9 +442,12 @@ export function createView(root, ctx) {
     const w = text.length * BADGE_CH + 12;
     // Badges sit in the gap above the agent lane, clear of its labels and step ticks.
     const by = Math.min(b.top - 27, root.querySelector(".lane-steps").getBoundingClientRect().top - lanes.getBoundingClientRect().top - 24);
-    return `<path class="link v-${verdict} phase-${c.phase} ${cls}" d="${d}"/><circle class="link-end v-${verdict} phase-${c.phase}" cx="${b.x}" cy="${b.top}" r="3.5"/>
+    const out = `<path class="link v-${verdict} phase-${c.phase} ${cls}" d="${d}"/><circle class="link-end v-${verdict} phase-${c.phase}" cx="${b.x}" cy="${b.top}" r="3.5"/>
       <path class="link-hit" data-link="${key}" d="${d}"/>
-      ${text ? `<g class="link-badge v-${verdict} phase-${c.phase}" data-link="${key}"><rect x="${b.x - w / 2}" y="${by}" width="${w}" height="18" rx="4"/><text x="${b.x}" y="${by + 12.5}" text-anchor="middle">${esc(text)}</text></g>` : ""}`;
+`;
+    // Badges go on top of every curve's hit area, so they are drawn last (drawLinks).
+    if (text) badges.push(`<g class="link-badge v-${verdict} phase-${c.phase}" data-link="${key}"><rect x="${b.x - w / 2}" y="${by}" width="${w}" height="18" rx="4"/><text x="${b.x}" y="${by + 12.5}" text-anchor="middle">${esc(text)}</text></g>`);
+    return out;
   }
 
   // Consecutive read-only steps (in lane order) share one bracket over their cards.
@@ -498,6 +503,7 @@ export function createView(root, ctx) {
       return cardRect(st, steps, base);
     };
     let html = "";
+    badges = [];
     const call = key != null ? callOf(key) : null;
     if (call) {
       const a = anchor(call);
@@ -534,45 +540,62 @@ export function createView(root, ctx) {
         if (a) html += linkHtml(c, stepT, a, b, verdict, `${cls} ${b.off ? "is-off" : ""}`, false);
       });
     }
-    svg.innerHTML = html;
+    svg.innerHTML = html + badges.join("");
   }
 
   // ---------- link popover ----------
   const linkPop = $("tj-link-pop");
   const VERDICT_CLASS = {viol: "bad", unk: "warn", sat: "ok", cand: "anchor", read: ""};
 
-  function linkPopHtml(key) {
+  // Hover previews a link's findings; a click pins the popover so its folded facts can open.
+  function linkPopHtml(key, pinned) {
     const read = key.startsWith("read:");
     const [ci, lo, hi] = (read ? key.slice(5) : key).split(":").map(Number);
     const c = state.model?.debugger?.calls[ci];
     if (!c) return "";
     const tools = [...new Set(c.tools.map(t => t.name).filter(Boolean))].join(" · ") || "no tools";
     const step = n => `S${String(n).padStart(2, "0")}`;
-    const head = `<div class="pop-head"><span class="mono">${esc(c.phase)} #${c.n} · ${esc(tools)}</span><span class="mono">→ ${read ? (lo === hi ? step(lo) : `${step(lo)}–${step(hi)}`) : step(lo)}</span></div>`;
-    if (read) return `${head}<p class="muted">Read only: this call drew no verdict on ${lo === hi ? "this step" : "these steps"}.</p>`;
-    const fact = fid => state.model.dsl?.factsById.get(fid);
-    const list = findingsOf(c).get(lo) || [];
-    if (!list.length) return `${head}<p class="muted">Read only: this call drew no verdict on this step.</p>`;
-    return `${head}<ol class="pop-rules">${list.map(f => {
-      const refs = f.cites.map(fact).filter(Boolean);
-      return `<li><div class="pop-rule"><span class="badge ${VERDICT_CLASS[f.verdict]}">${esc(f.word)}</span><span class="mono">${esc(f.subject || "")}</span></div>
-        ${f.reason ? `<p>${esc(short(String(f.reason), 260))}</p>` : ""}
-        ${refs.length ? `<div class="chip-col">${refs.slice(0, MAX_REFS).map(r => `<span class="fact-chip side-${esc(r.side)}"><span class="mono fid">f${r.fid}</span><span class="fact-text">${esc(short(factText(r), 70))}</span></span>`).join("")}${refs.length > MAX_REFS ? `<span class="muted">+${refs.length - MAX_REFS} more</span>` : ""}</div>` : ""}</li>`;
-    }).join("")}</ol>`;
+    const label = read && lo !== hi ? `${step(lo)}–${step(hi)}` : step(lo);
+    const list = read ? [] : findingsOf(c).get(lo) || [];
+    const head = `<div class="pop-head"><span class="mono">${esc(c.phase)} #${c.n} · ${esc(tools)}</span><span class="mono">→ ${label}</span></div>
+      <p class="pop-insight">${esc(insightFor(list, label))}</p>`;
+    if (!list.length) return head;
+    const facts = [...new Set(list.flatMap(f => f.cites))].map(fid => state.model.dsl?.factsById.get(fid)).filter(Boolean);
+    const rows = list.length > 1 ? `<ol class="pop-rules">${list.map(f => `<li><div class="pop-rule"><span class="badge ${VERDICT_CLASS[f.verdict]}">${esc(f.word)}</span><span class="mono">${esc(f.subject || "")}</span>
+        ${f.reason ? `<span class="muted">${esc(short(plainReason(f.reason), 140))}</span>` : ""}</div></li>`).join("")}</ol>` : "";
+    const factList = facts.length ? `<details class="pop-facts"><summary>${facts.length} fact${facts.length === 1 ? "" : "s"}</summary>
+        <div class="chip-col">${facts.map(f => pinned ? factChip(f) : `<span class="fact-chip side-${esc(f.side)}"><span class="mono fid">f${f.fid}</span><span class="fact-text">${esc(short(factText(f), 70))}</span></span>`).join("")}</div></details>` : "";
+    return `${head}${rows}${factList}<p class="pop-foot">${pinned ? "Pinned · click the link again or press Esc to close" : "Click to pin and open the facts"}</p>`;
   }
 
   function placeLinkPop(key, x, y) {
-    if (!key) { linkPop.hidden = true; linkPop.dataset.key = ""; return; }
-    if (linkPop.dataset.key !== key) { linkPop.innerHTML = linkPopHtml(key); linkPop.dataset.key = key; }
+    if (!key) { linkPop.hidden = true; linkPop.dataset.key = ""; linkPop.classList.remove("is-pinned"); return; }
+    const pinned = key === state.linkPin, id = `${key}:${pinned}`;
+    if (linkPop.dataset.key !== id) { linkPop.innerHTML = linkPopHtml(key, pinned); linkPop.dataset.key = id; }
+    linkPop.classList.toggle("is-pinned", pinned);
     linkPop.hidden = !linkPop.innerHTML;
+    if (x == null) return;
     const w = linkPop.offsetWidth, h = linkPop.offsetHeight;
     linkPop.style.left = `${Math.max(8, Math.min(innerWidth - w - 8, x + 14))}px`;
     linkPop.style.top = `${y + 16 + h > innerHeight - 8 ? Math.max(8, y - h - 12) : y + 16}px`;
   }
+  const unpinLink = () => { state.linkPin = null; placeLinkPop(null); };
   root.addEventListener("pointermove", event => {
+    if (state.linkPin) return;
     const link = event.target.closest?.("[data-link]");
     placeLinkPop(link?.dataset.link, event.clientX, event.clientY);
   });
+  // Capture phase: a pinned popover closes on any click outside it before other handlers run.
+  root.addEventListener("click", event => {
+    const link = event.target.closest?.("[data-link]")?.dataset.link;
+    if (link) {
+      event.stopPropagation();
+      state.linkPin = state.linkPin === link ? null : link;
+      placeLinkPop(state.linkPin ? link : null, event.clientX, event.clientY);
+      return;
+    }
+    if (state.linkPin && !event.target.closest(".link-pop")) unpinLink();
+  }, true);
 
   let raf = 0;
   const scheduleLinks = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { drawLinks(); placePop(); }); };
@@ -675,10 +698,11 @@ export function createView(root, ctx) {
     if (hn !== state.hover || hs !== state.hoverStep) { state.hover = hn; state.hoverStep = hs; scheduleLinks(); }
   });
   lanes.addEventListener("pointerleave", () => { state.hover = state.hoverStep = null; scheduleLinks(); });
-  root.addEventListener("pointerleave", () => { hoverArrow(null); placeLinkPop(null); });
+  root.addEventListener("pointerleave", () => { hoverArrow(null); if (!state.linkPin) placeLinkPop(null); });
 
   root.addEventListener("keydown", event => {
     if (event.key === "Escape") {
+      if (state.linkPin) { unpinLink(); return; }
       state.arrowPin = state.arrowHover = null; state.openStep = null; state.sel = state.selPhase = null;
       const was = new Set(state.openPhases);
       state.openPhases.clear();
