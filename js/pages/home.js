@@ -94,12 +94,14 @@ function videoDialog() {
   </dialog>`;
 }
 
-// Hero screenshots of the workbench (web/capture_shots.py); each opens the live view.
+// Hero screenshots of the workbench (web/capture_shots.py); each opens the live view. Each one is
+// cropped to a single feature and letterboxed on its own background colour, so it fits whole at
+// any stage size.
 const SHOTS = [
   ["trajectory", "Trajectory", "Debugger decisions linked to agent steps", caseHref(DEMO_REF, "trajectory", "step", 4)],
-  ["result", "Result", "Selected hypothesis, linked evidence", caseHref(DEMO_REF, "result")],
-  ["graph", "DSL Graph", "World state compiled from the trajectory", caseHref(DEMO_REF, "graph", "entities")],
-  ["chat", "Chat", "Launch or replay a diagnosis", "#/chat"],
+  ["facts", "DSL Facts", "Agent log compiled into facts, S04 lineage traced", caseHref(DEMO_REF, "graph", "facts", 48), "#0d131a"],
+  ["rules", "Rule Checks", "Rule violations grounded in cited facts", caseHref(DEMO_REF, "graph", "rules"), "#0d131a"],
+  ["root-cause", "Root Cause", "Selected hypothesis, evidence and repair", caseHref(DEMO_REF, "result"), "#080b0f"],
 ];
 
 // The original GIF composition, packaged as a same-origin static interactive view.
@@ -109,10 +111,10 @@ function heroShots() {
   return `<div class="shot-frame">
       <div class="shot-bar"><span class="demo-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="shot-caption"></span></div>
       <div class="shot-stage">
-        ${SHOTS.map(([id, label, caption, href]) => id === "trajectory"
+        ${SHOTS.map(([id, label, caption, href, bg]) => id === "trajectory"
           ? `<div class="shot" data-shot="${id}"><iframe src="${CLOUD_PREVIEW}" title="Interactive evidence cloud" style="display:block;width:100%;height:100%;border:0" loading="eager"></iframe></div>`
-          : `<a class="shot" href="${href}" data-shot="${id}">
-          <img src="./img/shots/${id === "trajectory" ? (matchMedia("(prefers-reduced-motion: reduce)").matches ? "evidence-cloud.png" : "evidence-cloud.gif") : `${id}.webp`}" width="1280" height="800" alt="${label} view: ${caption}"></a>`).join("")}
+          : `<a class="shot" href="${href}" data-shot="${id}" style="background:${bg}">
+          <img src="./img/shots/${id}.webp?v=20261102" width="1400" height="960" alt="${label} view: ${caption}" loading="lazy"></a>`).join("")}
       </div>
     </div>
     <div class="shot-tabs" role="tablist" aria-label="Product views">
