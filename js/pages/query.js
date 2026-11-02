@@ -10,7 +10,6 @@ import {layoutClusters, TIERS} from "../query/layout.js?v=23f9bfd6b4";
 import {createStage, clusterTitle} from "../query/stage.js?v=23f9bfd6b4";
 import {createTour, eventDuration} from "../query/tour.js?v=23f9bfd6b4";
 import {buildStory} from "../query/story.js?v=23f9bfd6b4";
-import {coachSeen, runCoach} from "../query/coach.js?v=23f9bfd6b4";
 import {createDetails} from "../query/details.js?v=23f9bfd6b4";
 import {mountOverviewNarrative} from "../query/overview.js?v=overview-narrative1";
 
@@ -267,23 +266,6 @@ export function mountQuery(app, route) {
     };
     const asked = route.query?.get("mode");
     if (asked === "overview" || asked === "story") setMode(asked);
-
-    // The guide: once per browser, again from the header's Guide button; playback waits for it.
-    const pick1 = (...sel) => sel.map(q => root.querySelector(q)).find(el => el?.getClientRects().length);
-    const guide = () => {
-      const was = state.playing;
-      setPlaying(false);
-      runCoach(root, [
-        {title: "Pick a run", target: () => root.querySelector(".qg-case"),
-         text: "Each case is one failed agent run. The debugger compiles its log into a DSL record, queries it, and names the step that caused the failure."},
-        {title: "Every cloud is a query",
-         text: "Floors rise PARSE → ROUTE → TRACE → SUBMIT. <b>Click</b> a cloud to light its causal chain, <b>click it again</b> to open it by entity. Drag to turn the tower, scroll to zoom."},
-        {title: "Follow a fact", before: () => ui.openPane("legend"), target: () => pick1(".qg-follows", ".qg-cta"), side: "right",
-         text: "These buttons trace one fact from the record to the verdict, stop by stop. Start with the root cause."},
-      ], () => { if (was && state.mode === "tour") setPlaying(true); });
-    };
-    ui.on("guide", guide);
-    if (!coachSeen()) guide();
   }).catch(error => {
     if (destroyed) return;
     root.innerHTML = `<div class="qg-error"><h2>Could not build the query graph</h2><p>${esc(error.message)}</p>
@@ -461,7 +443,6 @@ function template(scene, model, ref, roles, story) {
         <p><select class="qg-case" aria-label="Case">${CASES.map(c => `<option value="${esc(queryHref(c.ref))}"${c.ref[1] === ref[2] ? " selected" : ""}>${esc(c.label)}</option>`).join("")}${CASES.some(c => c.ref[1] === ref[2]) ? "" : `<option selected>${esc(scene.meta.tid)}</option>`}</select></p>
       </div>
       <div class="qg-modes">
-        <div class="qg-seg"><button data-act="guide" title="Show the guide again">Guide</button></div>
         <div class="qg-seg" role="group" aria-label="Mode"><button data-mode="story" aria-pressed="false">Story</button><button data-mode="tour" aria-pressed="true">Tour</button><button data-mode="overview" aria-pressed="false">Overview</button></div>
         <div class="qg-seg qg-views" role="group" aria-label="Camera" hidden><button data-view="front">Front</button><button data-view="top">Top</button><button data-view="side">Side</button></div>
       </div>
