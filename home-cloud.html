@@ -14,6 +14,111 @@ html,body {margin:0; padding:0; overflow:hidden; background:#06080b;}
 .cloud-preview-info[hidden] {display:none;}
 .cloud-fallback {width:100%;height:100%;object-fit:contain;display:block;}
 .cloud-fallback-note {position:absolute;bottom:10px;left:12px;color:#a9afc3;font:10px monospace;}
+/* Hero: the example case and the way into the quick preview. */
+.cloud-case {position:absolute; left:12px; bottom:58px; width:min(380px,calc(100% - 24px)); box-sizing:border-box; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:2px 12px; padding:9px 10px 9px 12px; border:1px solid #bca6db44; border-radius:8px; background:#0c101bdd; backdrop-filter:blur(6px); color:#c6c9d8; font:12px/1.4 'IBM Plex Sans',system-ui,sans-serif;}
+.cloud-case > :not(.cloud-case-open) {grid-column:1;}
+.cloud-case-kicker {font:500 9px/1.3 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase; color:#a9afc3;}
+.cloud-case strong {color:#eef2f6; font-weight:600; font-size:12.5px;}
+.cloud-case-line {color:#c6cfd7;}
+.cloud-case-root {display:flex; align-items:center; gap:6px; font:500 10px 'IBM Plex Mono',monospace; color:#e0b867;}
+.cloud-case-root i {width:6px; height:6px; background:#e0b867; transform:rotate(45deg); flex:none;}
+.cloud-case-open {grid-column:2; grid-row:1 / span 4; display:flex; flex-direction:column; align-items:center; gap:1px; padding:8px 12px; border:0; border-radius:6px; background:#e0b867; color:#14100a; font:600 12.5px 'IBM Plex Sans',system-ui,sans-serif; cursor:pointer; white-space:nowrap;}
+.cloud-case-open span {font:500 9.5px 'IBM Plex Mono',monospace; opacity:.75;}
+.cloud-case-open:hover {background:#f0cf86;}
+.cloud-case-open:focus-visible, .qp button:focus-visible, .qp a:focus-visible {outline:2px solid #f0cf86; outline-offset:2px;}
+.is-interactive-showcase .cloud-preview-info {left:auto; right:12px; bottom:58px;}
+@media (max-width:900px) { .cloud-case-line {display:none;} }
+@media (max-width:460px), (max-height:300px) { .cloud-case-kicker, .cloud-case-root, .cloud-case-open span {display:none;} .cloud-case {bottom:12px; padding:6px 6px 6px 10px;} }
+
+/* Quick preview: cloud on the left, the guided panel on the right (stacked on phones). */
+html.is-tour, html.is-tour body {overflow:hidden;}
+.qp {position:fixed; inset:0; display:grid; grid-template-columns:minmax(0,1fr) minmax(330px,min(440px,40vw)); background:#06080b; color:#c6cfd7; font:14px/1.55 'IBM Plex Sans',system-ui,sans-serif;}
+.qp .qp-stage.qg {position:relative; inset:auto; width:auto; height:auto; min-width:0; min-height:0; overflow:hidden;}
+.qp-info {bottom:58px !important; max-height:40% !important;}
+.qp-panel {display:flex; flex-direction:column; min-height:0; border-left:1px solid #1e2933; background:#0a0e13;}
+.qp-steps {display:grid; grid-template-columns:repeat(5,1fr); border-bottom:1px solid #1e2933;}
+.qp-steps button {padding:10px 4px 9px; border:0; border-bottom:2px solid transparent; background:none; color:#8592a0; font:500 11.5px 'IBM Plex Sans',system-ui,sans-serif; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:1px;}
+.qp-steps button span {font:500 9.5px 'IBM Plex Mono',monospace; color:var(--c); opacity:.8;}
+.qp-steps button:hover {color:#eef2f6; background:#10161d;}
+.qp-steps button[aria-current="true"] {color:#eef2f6; border-bottom-color:var(--c); background:#0f141a;}
+.qp-body {flex:1; min-height:0; overflow:auto; padding:18px 20px 22px; scrollbar-width:thin; scrollbar-color:#2a3540 transparent;}
+.qp-body:focus {outline:none;}
+.qp-body h2 {margin:2px 0 10px; color:#eef2f6; font-size:19px; line-height:1.3; font-weight:600;}
+.qp-body h3 {margin:18px 0 7px; color:#8592a0; font:500 10.5px 'IBM Plex Mono',monospace; letter-spacing:.08em; text-transform:uppercase;}
+.qp-body p {margin:0 0 8px;}
+.qp-body code {font:12px 'IBM Plex Mono',monospace; color:#d8cdea;}
+.qp-body em {color:#eef2f6; font-style:normal;}
+.qp-kicker {margin:0 0 4px !important; font:500 10.5px 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--qg-focus);}
+.qp-kicker.is-parse {color:var(--parse);} .qp-kicker.is-route {color:var(--route);} .qp-kicker.is-trace {color:var(--trace);} .qp-kicker.is-submit {color:var(--submit);}
+.qp-task {display:flex; flex-direction:column; gap:2px; padding:10px 12px; border-left:2px solid var(--qg-focus); background:#10151c; border-radius:0 6px 6px 0;}
+.qp-task span {font:500 9.5px 'IBM Plex Mono',monospace; letter-spacing:.1em; text-transform:uppercase; color:#8592a0;}
+.qp-task strong {color:#eef2f6; font-weight:500;}
+.qp-meta {margin:7px 0 6px !important; color:#8592a0; font:11.5px 'IBM Plex Mono',monospace;}
+.qp-hint {color:#8592a0; font-size:12.5px;}
+.qp-next {margin-top:16px !important; color:#8592a0; font-size:12.5px;}
+.qp-chips {display:flex; flex-wrap:wrap; gap:5px; margin:2px 0 6px;}
+.qp-chip {padding:2px 8px; border:1px solid #2a3540; border-radius:999px; background:#0f141a; color:#c6cfd7; font:11.5px 'IBM Plex Mono',monospace;}
+button.qp-chip {cursor:pointer;} button.qp-chip:hover {border-color:var(--route); color:#eef2f6;}
+.qp-chip.is-more {color:#8592a0; border-style:dashed;}
+.qp-item {display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; width:100%; box-sizing:border-box; margin:0 0 6px; padding:8px 10px; text-align:left; border:1px solid #1e2933; border-radius:6px; background:#0d1217; color:#c6cfd7; font:13px/1.45 'IBM Plex Sans',system-ui,sans-serif; cursor:pointer; transition:border-color .15s, background .15s;}
+.qp-item:hover {border-color:#46535f; background:#111820;}
+.qp-item.is-on {border-color:var(--qg-focus); background:#17150f; box-shadow:inset 3px 0 0 var(--qg-focus);}
+.qp-item.is-static {cursor:default;}
+.qp-item q {flex-basis:100%; color:#aab4be; font-style:italic; quotes:"“" "”";}
+.qp-item.is-head {margin-bottom:6px; background:none;}
+.qp-item.is-root {border-color:#e0b86766; background:#14120c;}
+.qp-item.is-root q {color:#eadcc0;}
+.qp-tag {font:500 11px 'IBM Plex Mono',monospace; color:#d8cdea; white-space:nowrap;}
+.qp-tag.is-root {color:var(--qg-focus);} .qp-tag.is-issue {color:var(--qg-issue);} .qp-tag.is-trace {color:var(--trace);} .qp-tag.is-cand {color:var(--qg-cand);}
+.qp-card {margin:0 0 10px; padding:10px 10px 4px; border:1px solid #1e2933; border-radius:8px; background:#0b1015;}
+.qp-card > p {padding:0 2px; font-size:13px; color:#aab4be;}
+.qp-card.is-issue {border-top:2px solid color-mix(in srgb, var(--qg-issue) 60%, transparent);}
+.qp-card.is-trace {border-top:2px solid color-mix(in srgb, var(--trace) 60%, transparent);}
+.qp-card.is-rival {border-top:2px solid color-mix(in srgb, var(--qg-cand) 50%, transparent);}
+.qp-question {color:#c6cfd7 !important;}
+.qp-list .qp-item {font-size:12.5px;}
+.qp-chain {list-style:none; margin:0; padding:0 0 0 14px; border-left:1px dashed #46535f;}
+.qp-chain li {position:relative;}
+.qp-chain li::before {content:""; position:absolute; left:-18px; top:14px; width:7px; height:7px; border-radius:50%; background:var(--submit);}
+.qp-fact {display:block; flex-basis:100%; overflow-wrap:anywhere; color:#d8cdea !important;}
+.qp-stats {display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:12px 0 4px;}
+.qp-stats div {padding:8px; border:1px solid #1e2933; border-radius:6px; background:#0d1217; text-align:center;}
+.qp-stats b {display:block; color:#eef2f6; font:600 18px 'IBM Plex Sans',system-ui,sans-serif;}
+.qp-stats span {color:#8592a0; font:10.5px 'IBM Plex Mono',monospace;}
+.qp-bars {display:grid; gap:4px;}
+.qp-bars div {display:grid; grid-template-columns:84px 1fr 34px; align-items:center; gap:8px; font:11.5px 'IBM Plex Mono',monospace; color:#8592a0;}
+.qp-bars i {display:block; height:6px; width:var(--w); min-width:2px; border-radius:3px; background:var(--parse);}
+.qp-bars b {color:#c6cfd7; font-weight:500; text-align:right;}
+.qp-fix {margin:18px 0 6px; padding:11px 13px; border:1px solid #8cc49a55; border-radius:8px; background:#0e1a13;}
+.qp-fix h3 {margin:0 0 5px !important; color:var(--submit) !important;}
+.qp-fix p {margin:0 !important; color:#dcebdc;}
+.qp-links {margin-top:16px;}
+.qp-links a {color:var(--qg-focus); text-decoration:none; font-weight:500;}
+.qp-links a:hover {text-decoration:underline;}
+.qp-axis {display:grid; gap:3px; padding:10px 12px 6px; border:1px solid #1e2933; border-radius:8px; background:#0b1015;}
+.qp-axis-row {display:grid; grid-template-columns:74px 1fr; align-items:center; min-height:20px;}
+.qp-axis-label {font:10.5px 'IBM Plex Mono',monospace; color:#8592a0;}
+.qp-axis-track {position:relative; height:20px; margin:0 6px; background:linear-gradient(#222c36,#222c36) center/100% 1px no-repeat;}
+.qp-axis-row.is-scale .qp-axis-track {background:none; height:14px;}
+.qp-axis-row.is-scale .qp-axis-track span {position:absolute; transform:translateX(-50%); font:9.5px 'IBM Plex Mono',monospace; color:#56616c;}
+.qp-mark {position:absolute; top:50%; width:12px; height:12px; margin:-6px 0 0 -6px; padding:0; border:2px solid #0b1015; border-radius:50%; cursor:pointer;}
+.qp-mark.is-issue {background:var(--qg-issue);} .qp-mark.is-cand {background:var(--qg-cand);} .qp-mark.is-ev {background:var(--submit); width:9px; height:9px; margin:-4.5px 0 0 -4.5px;}
+.qp-mark.is-root {background:var(--qg-focus); border-radius:2px; transform:rotate(45deg);}
+.qp-mark:hover, .qp-mark.is-on {box-shadow:0 0 0 2px #eef2f6;}
+.qp-foot {display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 14px; border-top:1px solid #1e2933;}
+.qp-foot button {padding:7px 12px; border:1px solid #2a3540; border-radius:6px; background:#0f141a; color:#c6cfd7; font:500 12.5px 'IBM Plex Sans',system-ui,sans-serif; cursor:pointer;}
+.qp-foot button:hover:not(:disabled) {border-color:#46535f; color:#eef2f6;}
+.qp-foot button:disabled {opacity:.35; cursor:default;}
+.qp-foot button.is-primary {border-color:var(--qg-focus); background:var(--qg-focus); color:#14100a;}
+.qp-foot button.is-primary:hover {background:#f0cf86;}
+.qp-count {font:11px 'IBM Plex Mono',monospace; color:#8592a0;}
+@media (max-width:760px) {
+  .qp {grid-template-columns:1fr; grid-template-rows:minmax(200px,40svh) minmax(0,1fr);}
+  .qp-panel {border-left:0; border-top:1px solid #1e2933;}
+  .qp .cloud-controls span {display:none;}
+  .qp-body {padding:14px 16px 18px;}
+  .qp-steps button {font-size:11px;}
+}
 </style></head><body><main class="qg"><img class="cloud-fallback" src="./img/shots/evidence-cloud.png" alt="Loading interactive evidence cloud"></main><script type="module">
 const __modules = Object.create(null);
 __modules["util.js"] = (() => {
@@ -2091,17 +2196,359 @@ function showcaseFrame(scene, model, layout) {
 
 return {SHOWCASE_SIZE,CAPTURE_CAMERA,showcaseFrame};
 })();
+__modules["query/quick-preview.js"] = (() => {
+// Quick preview: the same evidence cloud with a guided five-chapter panel beside it. Chapter one
+// tells the whole case (task, what went wrong, root cause, fix); the other four walk through how
+// the debugger got there. Every evidence item in the panel is a link into the cloud: a cloud item
+// lights its causal chain, a fact item draws the fact's way from the record to its verdict.
+const {esc} = __modules["util.js"];
+const {createStage, clusterTitle} = __modules["query/stage.js"];
+const {createTour} = __modules["query/tour.js"];
+const {chainOf, journeyOf} = __modules["query/clusters.js"];
+const {SLOT_LABEL} = __modules["query/model.js"];
+
+const MODULE_SLOT = {observation: "obs", memory: "mem", reflection: "refl", plan: "plan", action: "act", check: "chk"};
+const BENCH = {alfworld: "ALFWorld", webshop: "WebShop", chat: "Chat"};
+const FAULT = {
+  inefficient_plan: "unsupported plan", constraint_ignorance: "ignored constraint", impossible_action: "impossible action",
+  progress_misjudge: "progress misjudged", causal_misattribution: "wrong cause", outcome_misinterpretation: "misread outcome",
+  hallucination: "hallucination", over_simplification: "over-simplified memory", memory_retrieval_failure: "memory retrieval failure",
+};
+const faultText = f => f ? FAULT[f] || String(f).replace(/_/g, " ") : "";
+const STATUS = {uncertain: "possible error", error: "error"};
+const CAMERA = Object.freeze({yaw: .95, pitch: .12, distanceScale: .9, shiftX: 46, shiftY: 0});
+
+// A short, curated headline for the showcased case; any other case falls back to the record.
+const CASE_NOTES = {
+  "GPT-4o_024_alfworld_task_024": {
+    headline: "The agent washed the pot and took that as cooling it.",
+    story: "To finish the task the pot had to be cool. At step 17 the agent planned to clean the pot in the sink basin “to cool it down”. The feedback only confirmed cleaning, yet later steps treated the pot as cool, and steps 20 and 22 declared the task complete.",
+  },
+};
+
+const norm = t => String(t || "").replace(/\s+/g, " ").trim();
+const clip = (t, n) => { t = norm(t); return t.length > n ? t.slice(0, n - 1).replace(/\s+\S*$/, "") + "…" : t; };
+const sentences = (t, k = 1) => (norm(t).match(/[^.?!]+[.?!]+["”’)]*(?=\s|$)/g) || [norm(t)]).slice(0, k).join(" ").trim();
+// Agent text: drop the prompt header line ("Plan the next step …") and keep the first bullet.
+function agentText(span) {
+  const lines = String(span || "").split("\n").map(s => s.trim()).filter(Boolean);
+  const bullets = lines.filter(l => l.startsWith("-")).map(l => l.replace(/^-\s*/, ""));
+  return bullets[0] || lines[0] || "";
+}
+const stepTag = (step, module) => `S${step} · ${module}`;
+
+function factAt(scene, step, module, quote = "") {
+  const slot = MODULE_SLOT[module] || module;
+  const cell = scene.facts.filter(f => f.t === step && f.slot === slot);
+  const head = norm(quote).slice(0, 32).toLowerCase();
+  return (head && cell.find(f => norm(f.span).toLowerCase().includes(head))) || cell[0] || null;
+}
+
+// Everything the panel says, gathered once from the scene and the run files.
+function caseFacts(scene, model, data) {
+  const {meta, root, windows, lanes, candidates, result, events} = scene;
+  const plan = data.managerPlan || {};
+  const goal = (data.record.goals || [])[0];
+  const constraints = (goal?.constraints || []).map(c => {
+    const name = String(c.property?.index || "").replace(/_type$/, "").replace(/_/g, " ");
+    return c.expected === true ? name : `${name} = ${c.expected}`;
+  });
+  const sources = list => (list || []).map(e => {
+    const m = String(e.source_id || "").match(/^source:(\d+):(\w+)/);
+    if (!m) return null;
+    const step = Number(m[1]), module = m[2];
+    return {step, module, quote: e.quote || "", fid: factAt(scene, step, module, e.quote)?.fid ?? null};
+  }).filter(Boolean).sort((a, b) => a.step - b.step);
+  const laneOf = agent => lanes.find(l => l.agent === agent);
+  const assignments = (plan.assignments || []).map(a => ({...a, lane: laneOf(a.agent_id), evidence: sources(a.evidence)}));
+  const rootLane = root?.candidate ? candidates.find(c => c.id === root.candidate)?.lane : null;
+  const rootAssignment = assignments.find(a => a.lane?.id === rootLane) || assignments[0] || null;
+  const comparisons = new Map((result?.candidate_comparisons || []).map(c => [c.candidate_id, c.reasoning || ""]));
+  const rivals = candidates.filter(c => c.id !== root?.candidate).map(c => ({...c, why: comparisons.get(c.candidateId) || ""}));
+  const views = events.map((ev, i) => ({ev, i})).filter(({ev}) => ev.cluster && (ev.phase === "MAP" || (ev.phase === "ROUTE" && ev.name !== "route_cases")));
+  const slots = ["obs", "mem", "refl", "plan", "act", "chk"].map(s => [s, scene.facts.filter(f => f.t != null && f.slot === s).length]).filter(([, n]) => n);
+  return {
+    meta, root, windows, lanes, candidates, result, plan, constraints, assignments, rootAssignment, rivals, views, slots,
+    note: CASE_NOTES[meta.tid] || null,
+    agent: String(meta.tid || "").split("_")[0],
+    bench: BENCH[meta.taskType] || meta.taskType || "",
+    rootFact: root?.fid != null ? scene.factById.get(root.fid) : null,
+    rule: (plan.decision_rules || []).find(r => r.rule_id === root?.rule?.id) || null,
+  };
+}
+
+const item = (attrs, inner, cls = "") => `<button type="button" class="qp-item ${cls}" ${attrs}>${inner}</button>`;
+const factItem = (fid, step, module, quote, cls = "") => fid == null
+  ? `<div class="qp-item is-static ${cls}"><span class="qp-tag">${esc(stepTag(step, module))}</span><q>${esc(clip(quote, 150))}</q></div>`
+  : item(`data-fid="${fid}"`, `<span class="qp-tag">${esc(stepTag(step, module))}</span><q>${esc(clip(quote, 150))}</q>`, cls);
+
+// A step axis (S1…Sn) with one row per kind of finding; each mark opens its cloud.
+function stepAxis(K) {
+  const n = Math.max(2, K.meta.steps);
+  const x = s => `${((s - 1) / (n - 1)) * 100}%`;
+  const evidence = K.rootAssignment?.evidence || [];
+  const rows = [
+    ["Suspects", "issue", K.windows.map(w => ({step: w.step, attr: `data-cluster="${esc(w.id)}"`, label: `${w.caseId} · S${w.step}`}))],
+    ["Candidates", "cand", K.candidates.map(c => ({step: c.step, attr: `data-cluster="${esc(c.id)}"`, label: `S${c.step} ${c.module}`}))],
+    ["Evidence", "ev", [...new Map(evidence.filter(e => e.fid != null).map(e => [e.fid, e])).values()].map(e => ({step: e.step, attr: `data-fid="${e.fid}"`, label: `S${e.step} ${e.module}`}))],
+    ["Root", "root", K.root ? [{step: K.root.step, attr: 'data-cluster="root"', label: `S${K.root.step} ${K.root.module}`}] : []],
+  ].filter(([, , marks]) => marks.length);
+  const ticks = [1, ...[5, 10, 15, 20, 25, 30, 40, 50].filter(s => s < n - 2), n];
+  return `<div class="qp-axis" role="group" aria-label="Where the findings sit on the agent's ${n} steps">
+    ${rows.map(([label, kind, marks]) => `<div class="qp-axis-row"><span class="qp-axis-label">${label}</span><div class="qp-axis-track">
+      ${marks.map(m => `<button type="button" class="qp-mark is-${kind}" style="left:${x(m.step)}" ${m.attr} title="${esc(m.label)}" aria-label="${esc(m.label)}"></button>`).join("")}
+    </div></div>`).join("")}
+    <div class="qp-axis-row is-scale"><span class="qp-axis-label">Step</span><div class="qp-axis-track">${ticks.map(s => `<span style="left:${x(s)}">${s}</span>`).join("")}</div></div>
+  </div>`;
+}
+
+function chapterCase(K) {
+  const r = K.root;
+  return `<p class="qp-kicker">The case in one minute</p>
+    <h2>${esc(K.note?.headline || (r ? `The failure traces back to step ${r.step}'s ${r.module}.` : "No root cause was named."))}</h2>
+    <div class="qp-task"><span>Task</span><strong>“${esc(K.meta.task)}”</strong></div>
+    <p class="qp-meta">${[K.bench, K.agent && `${K.agent} agent`, `${K.meta.steps} steps`].filter(Boolean).map(esc).join(" · ")}</p>
+    ${K.constraints.length ? `<div class="qp-chips" aria-label="Goal requirements">${K.constraints.map(c => `<span class="qp-chip">${esc(c)}</span>`).join("")}</div>` : ""}
+    <h3>What happened</h3>
+    <p>${esc(K.note?.story || r?.proposition || K.result?.stop_reason || "")}</p>
+    ${r ? `<h3>Root cause</h3>${item('data-cluster="root"', `<span class="qp-tag is-root">${esc(stepTag(r.step, r.module))}</span><span>${esc(faultText(r.faultClass) || "root cause")}</span><q>${esc(clip(r.quote, 160))}</q>`, "is-root")}` : ""}
+    <h3>Where the findings sit</h3>${stepAxis(K)}
+    ${K.result?.repair ? `<div class="qp-fix"><h3>Suggested fix</h3><p>${esc(K.result.repair)}</p></div>` : ""}
+    <p class="qp-next">Next: how ProDebugger found it, in four stages.</p>`;
+}
+
+function chapterParse(K, scene) {
+  const f = K.rootFact;
+  return `<p class="qp-kicker is-parse">Stage 1 · Parse</p>
+    <h2>Turn the ${K.meta.steps}-step log into facts.</h2>
+    <p>Every observation, memory, reflection, plan and action becomes a typed fact, <code>rel(args) = value @ step</code>. The debugger queries these facts instead of re-reading raw text, and every later claim points back to one.</p>
+    <div class="qp-stats"><div><b>${scene.facts.length}</b><span>facts</span></div><div><b>${scene.entities.length}</b><span>entities</span></div><div><b>${K.meta.steps}</b><span>steps</span></div><div><b>${scene.goals.length}</b><span>goal${scene.goals.length === 1 ? "" : "s"}</span></div></div>
+    <h3>Facts by agent module</h3>
+    <div class="qp-bars">${K.slots.map(([s, n]) => `<div><span>${esc(SLOT_LABEL[s])}</span><i style="--w:${(n / Math.max(...K.slots.map(x => x[1]))) * 100}%"></i><b>${n}</b></div>`).join("")}</div>
+    ${K.constraints.length ? `<h3>The goal, as a checkable contract</h3><p>The task becomes one requirement with ${K.constraints.length} conditions; each must be shown by evidence before the goal counts as met.</p><div class="qp-chips">${K.constraints.map(c => `<span class="qp-chip">${esc(c)}</span>`).join("")}</div>` : ""}
+    ${f ? `<h3>One fact, as the debugger sees it</h3>
+      ${item(`data-fid="${f.fid}"`, `<code class="qp-fact">[${f.fid}] S${f.t} ${esc(SLOT_LABEL[f.slot])} · ${esc(f.rel)}(${esc(f.args.join(", "))}) = ${esc(clip(typeof f.value === "string" ? f.value : JSON.stringify(f.value), 40))}</code><q>${esc(clip(agentText(f.span), 150))}</q>`)}
+      <p class="qp-hint">This is the fact the run ends up blaming. Click it to follow it through the cloud.</p>` : ""}`;
+}
+
+function chapterRoute(K, scene) {
+  const intents = [...new Map(K.views.map(({ev}) => [ev.cluster, ev])).values()];
+  return `<p class="qp-kicker is-route">Stage 2 · Route</p>
+    <h2>Scan the record, then open ${K.windows.length} suspect window${K.windows.length === 1 ? "" : "s"}.</h2>
+    <p>ROUTE ran ${intents.length} read-only queries over the facts: the goal's state, the episodes, per-step audits. It looked for places where the agent's beliefs and the world disagree.</p>
+    <div class="qp-chips is-links">${intents.slice(0, 10).map(ev => `<button type="button" class="qp-chip" data-cluster="${esc(ev.cluster)}">${esc(clip(ev.error ? `${ev.name} · rejected` : ev.intent || ev.name, 34))}</button>`).join("")}${intents.length > 10 ? `<span class="qp-chip is-more">+${intents.length - 10} more</span>` : ""}</div>
+    <h3>Suspect windows</h3>
+    ${K.windows.map(w => `<article class="qp-card is-issue">
+      ${item(`data-cluster="${esc(w.id)}"`, `<span class="qp-tag is-issue">${esc(w.caseId)} · step ${w.step}</span><span>${w.fids.length} issue fact${w.fids.length === 1 ? "" : "s"}</span>`, "is-head")}
+      <p>${esc(clip(sentences(w.hypothesis, 2), 300))}</p>
+      <div class="qp-list">${w.fids.map(fid => scene.factById.get(fid)).filter(Boolean).map(f => factItem(f.fid, f.t, SLOT_LABEL[f.slot], agentText(f.span))).join("")}</div>
+    </article>`).join("")}`;
+}
+
+function chapterTrace(K, scene) {
+  return `<p class="qp-kicker is-trace">Stage 3 · Trace</p>
+    <h2>Test each suspect with one targeted query.</h2>
+    <p>A manager turns every window into a question with criteria for <em>supported</em>, <em>refuted</em> and <em>unknown</em>. Each TRACE lane answers it with one SQL query over the log, then proposes the step it blames.</p>
+    ${K.assignments.map(a => {
+      const l = a.lane, cands = (l?.candidates || []).map(id => scene.candidates.find(c => c.id === id)).filter(Boolean);
+      return `<article class="qp-card is-trace">
+        ${item(`data-cluster="${esc(l?.id || "")}"`, `<span class="qp-tag is-trace">${esc(a.agent_id)}</span><span>tests ${esc(a.anchor_case_id)}${l ? ` · ${l.rows.length} rows on ${l.steps.length} steps` : ""}</span>`, "is-head")}
+        <p class="qp-question">${esc(clip(sentences(a.question, 1), 220))}</p>
+        ${cands.map(c => item(`data-cluster="${esc(c.id)}"`, `<span class="qp-tag is-cand">blames ${esc(stepTag(c.step, c.module))}</span><span>${esc([STATUS[c.status] || c.status, faultText(c.faultClass)].filter(Boolean).join(" · "))}</span><q>${esc(clip(c.quote, 140))}</q>`, "is-cand")).join("") || '<p class="qp-hint">No candidate from this lane.</p>'}
+      </article>`;
+    }).join("")}`;
+}
+
+function chapterVerdict(K, href) {
+  const r = K.root;
+  if (!r) return `<p class="qp-kicker is-submit">Stage 4 · Submit</p><h2>No root cause was named.</h2><p>${esc(K.result?.stop_reason || "")}</p>`;
+  const ev = K.rootAssignment?.evidence || [];
+  return `<p class="qp-kicker is-submit">Stage 4 · Submit</p>
+    <h2>Root cause: step ${r.step}'s ${esc(r.module)}.</h2>
+    ${item('data-cluster="root"', `<span class="qp-tag is-root">${esc(stepTag(r.step, r.module))}</span><span>${esc(faultText(r.faultClass))}</span><q>${esc(r.quote)}</q>`, "is-root")}
+    <p>${esc(r.proposition)}</p>
+    ${ev.length ? `<h3>Evidence chain</h3><p class="qp-hint">The recorded lines the investigation rests on, in step order. Click one to see how it travelled through the cloud.</p>
+      <ol class="qp-chain">${ev.map(e => `<li>${factItem(e.fid, e.step, e.module, e.quote)}</li>`).join("")}</ol>` : ""}
+    ${K.rivals.length ? `<h3>Why not the rival</h3>${K.rivals.map(c => `<article class="qp-card is-rival">${item(`data-cluster="${esc(c.id)}"`, `<span class="qp-tag is-cand">${esc(stepTag(c.step, c.module))}</span><span>${esc(faultText(c.faultClass) || c.status)}</span>`, "is-head")}<p>${esc(clip(c.why ? sentences(c.why, 2) : c.proposition, 320))}</p></article>`).join("")}` : ""}
+    ${K.rule ? `<h3>Deciding rule</h3><p><code>${esc(K.rule.rule_id)}</code>, one of ${(K.plan.decision_rules || []).length} rules the manager fixed before TRACE ran: ${esc(clip(K.rule.conclusion, 200))}</p>` : ""}
+    ${K.result?.repair ? `<div class="qp-fix"><h3>Suggested fix</h3><p>${esc(K.result.repair)}</p></div>` : ""}
+    ${K.result?.uncertainty ? `<h3>What the evidence does not show</h3><p>${esc(clip(sentences(K.result.uncertainty, 2), 320))}</p>` : ""}
+    <div class="qp-links"><a href="${esc(href)}" target="_top">Open the full Query Graph →</a></div>`;
+}
+
+const CHAPTERS = [
+  {id: "case", label: "Case", phase: "focus"},
+  {id: "parse", label: "Parse", phase: "parse"},
+  {id: "route", label: "Route", phase: "route"},
+  {id: "trace", label: "Trace", phase: "trace"},
+  {id: "verdict", label: "Verdict", phase: "submit"},
+];
+
+// What a cloud is, in one line, for the info box under the cursor or selection.
+function cloudLine(c, scene) {
+  const r = c.ref;
+  if (c.kind === "core") return `The whole trajectory as ${scene.facts.length} facts. Every query starts here.`;
+  if (c.kind === "query") return `A read-only ROUTE query: ${c.intent || c.label}. ${c.detail}.`;
+  if (c.kind === "window") return `Suspect window at step ${r.step}: ${clip(sentences(r.hypothesis, 1), 170)}`;
+  if (c.kind === "lane") return `TRACE lane testing ${r.anchor}: ${clip(sentences(r.question, 1), 170)}`;
+  if (c.kind === "candidate") return `Blames step ${r.step}'s ${r.module} (${STATUS[r.status] || r.status}): ${clip(r.proposition, 170)}`;
+  if (c.kind === "root") return `Chosen root cause: ${clip(r.proposition, 190)}`;
+  return c.detail || "";
+}
+
+function mountQuickPreview(root, scene, model, layout, data, {href = "#", start = 0} = {}) {
+  const K = caseFacts(scene, model, data);
+  root.className = "qp";
+  root.innerHTML = `<div class="qp-stage qg">
+      <canvas class="qg-canvas" tabindex="0" aria-label="Evidence cloud. Drag to rotate, scroll to zoom, click a cloud to see how it links to the rest."></canvas>
+      <div class="cloud-controls"><span>Drag to rotate · Scroll to zoom · Click a cloud or an evidence item</span><button type="button" data-cloud-reset>Reset view</button></div>
+      <div class="cloud-preview-info qp-info" role="status" aria-live="polite" hidden></div>
+    </div>
+    <aside class="qp-panel" aria-label="Quick preview of the case">
+      <nav class="qp-steps" aria-label="Chapters">${CHAPTERS.map((c, i) => `<button type="button" data-chapter="${i}" style="--c:var(--${c.phase === "focus" ? "qg-focus" : c.phase})"><span>0${i + 1}</span>${c.label}</button>`).join("")}</nav>
+      <div class="qp-body" tabindex="-1"></div>
+      <footer class="qp-foot"><button type="button" data-step="-1">‹ Back</button><span class="qp-count"></span><button type="button" data-step="1" class="is-primary">Next ›</button></footer>
+    </aside>`;
+  const canvas = root.querySelector("canvas"), info = root.querySelector(".qp-info"), body = root.querySelector(".qp-body");
+  // A narrow canvas draws at a wider logical size and is scaled down, as in the hero, so the
+  // cloud labels keep their spacing instead of piling up.
+  const fitRender = () => {
+    const r = canvas.getBoundingClientRect();
+    if (r.width && r.width < 700) Object.assign(canvas.dataset, {renderWidth: 760, renderHeight: Math.round(r.height * 760 / r.width)});
+    else { delete canvas.dataset.renderWidth; delete canvas.dataset.renderHeight; }
+  };
+  fitRender();
+  window.addEventListener("resize", fitRender);
+  const stage = createStage(canvas, scene, model, layout);
+  const tour = createTour(scene, model, layout);
+  const last = scene.events.length - 1;
+  const lastIndex = pred => { for (let i = last; i >= 0; i--) if (pred(scene.events[i])) return i; return -1; };
+  const routed = lastIndex(e => e.name === "route_cases");
+  const routeAt = routed >= 0 ? routed : Math.max(0, lastIndex(e => e.phase === "ROUTE" || e.phase === "MAP"));
+  const traceAt = Math.max(routeAt, lastIndex(e => e.phase === "TRACE" || e.phase === "MANAGER"));
+  const full = scene.root ? chainOf(model, "root") : null;
+  const frames = [
+    {at: last, chain: full, focus: scene.root ? ["root"] : []},
+    {at: 0},
+    {at: routeAt},
+    {at: traceAt},
+    {at: last, chain: full, focus: scene.root ? ["root"] : []},
+  ];
+  const builders = [() => chapterCase(K), () => chapterParse(K, scene), () => chapterRoute(K, scene), () => chapterTrace(K, scene), () => chapterVerdict(K, href)];
+  let chapter = -1, pick = null;
+
+  stage.start(() => {
+    const ch = frames[chapter] || frames[0];
+    // A fact's journey can reach clouds from later stages, so it shows the whole run.
+    const out = tour(stage.journey || (pick && model.byId.get(pick)?.event > ch.at) ? last : ch.at, 1);
+    Object.assign(out.frame, {
+      chain: pick ? chainOf(model, pick) : ch.chain || null, labelAll: false, guided: true, captureCamera: CAMERA,
+      filter: {phases: new Set()}, focus: new Set(pick ? [pick] : ch.focus || out.frame.focus),
+    });
+    return out;
+  }, {snap: true});
+
+  const showInfo = (title, text) => {
+    info.hidden = !title;
+    info.innerHTML = title ? `<strong>${esc(title)}</strong><span>${esc(text)}</span>` : "";
+  };
+  const showCloud = c => c ? showInfo(c.kind === "core" ? "DSL record" : clusterTitle(c), cloudLine(c, scene)) : showInfo(null);
+  const mark = () => body.querySelectorAll("[data-cluster],[data-fid]").forEach(el => {
+    const on = (pick && el.dataset.cluster === pick) || (stage.journey && Number(el.dataset.fid) === stage.journey.fid);
+    el.classList.toggle("is-on", !!on);
+  });
+
+  function pickCloud(id) {
+    if (!model.byId.has(id)) return;
+    if (pick === id) { stage.follow(); return; }
+    stage.follow();
+    stage.select(id);
+  }
+  function pickFact(fid) {
+    if (stage.journey?.fid === fid) { stage.follow(); return; }
+    const j = journeyOf(scene, model, fid);
+    stage.follow();
+    if (j.stops.length > 1) stage.setJourney(j);
+    else { pick = "core"; stage.select("core"); }
+  }
+  stage.on("select", sel => {
+    pick = sel?.cluster?.id || null;
+    if (sel?.kind === "fact") { const f = scene.factById.get(sel.fid); showInfo(`S${f.t} · ${SLOT_LABEL[f.slot]}`, agentText(f.span) || f.rel); }
+    else showCloud(sel?.cluster);
+    mark();
+  });
+  stage.on("journey", j => {
+    if (j) { pick = null; showInfo(`Fact ${j.fid} · S${j.fact.t} ${SLOT_LABEL[j.fact.slot]}`, `${clip(agentText(j.fact.span), 120)} · ${j.stops.length} stops${j.end ? `; ${j.end}` : ""}.`); }
+    else if (!pick) showInfo(null);
+    mark();
+  });
+  stage.on("hover", h => { if (!pick && !stage.journey) showCloud(h?.cluster); });
+
+  function go(i) {
+    i = Math.max(0, Math.min(CHAPTERS.length - 1, i));
+    if (i === chapter) return;
+    chapter = i;
+    pick = null;
+    stage.follow(); stage.release();
+    body.innerHTML = builders[i]();
+    body.scrollTop = 0;
+    root.querySelectorAll("[data-chapter]").forEach(b => b.setAttribute("aria-current", String(Number(b.dataset.chapter) === i)));
+    root.querySelector(".qp-count").textContent = `${i + 1} / ${CHAPTERS.length}`;
+    root.querySelector('[data-step="-1"]').disabled = i === 0;
+    const next = root.querySelector('[data-step="1"]');
+    next.textContent = i === CHAPTERS.length - 1 ? "Start over ↺" : `Next · ${CHAPTERS[i + 1].label} ›`;
+    root.dataset.chapter = CHAPTERS[i].id;
+    try { history.replaceState(null, "", `#${CHAPTERS[i].id}`); } catch {}
+  }
+
+  root.addEventListener("click", e => {
+    const t = e.target.closest("[data-chapter],[data-step],[data-cluster],[data-fid],[data-cloud-reset]");
+    if (!t) return;
+    if (t.dataset.chapter != null) go(Number(t.dataset.chapter));
+    else if (t.dataset.step) go(chapter === CHAPTERS.length - 1 && t.dataset.step === "1" ? 0 : chapter + Number(t.dataset.step));
+    else if (t.dataset.cluster) pickCloud(t.dataset.cluster);
+    else if (t.dataset.fid) pickFact(Number(t.dataset.fid));
+    else { stage.follow(); stage.release(); }
+  });
+  root.addEventListener("keydown", e => {
+    if (e.target.closest("input, textarea")) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); go(chapter + 1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(chapter - 1); }
+    else if (e.key === "Escape" && (pick || stage.journey)) { e.preventDefault(); stage.follow(); stage.release(); }
+  });
+  const named = CHAPTERS.findIndex(c => c.id === start);
+  go(named >= 0 ? named : Number(start) || 0);
+  return stage;
+}
+
+// The hero card on the plain cloud: the case in three lines and the way into the quick preview.
+function caseCard(scene) {
+  const r = scene.root, note = CASE_NOTES[scene.meta.tid];
+  return `<aside class="cloud-case" aria-label="The example case">
+    <span class="cloud-case-kicker">Example case · ${esc([BENCH[scene.meta.taskType] || scene.meta.taskType, `${scene.meta.steps} steps`].filter(Boolean).join(" · "))}</span>
+    <strong>“${esc(scene.meta.task)}”</strong>
+    ${note ? `<span class="cloud-case-line">${esc(note.headline)}</span>` : ""}
+    ${r ? `<span class="cloud-case-root"><i aria-hidden="true"></i>Root cause · S${r.step} ${esc(r.module)}${r.faultClass ? ` · ${esc(faultText(r.faultClass))}` : ""}</span>` : ""}
+    <button type="button" class="cloud-case-open" data-quick-preview>▶ Quick preview <span>5 short chapters</span></button>
+  </aside>`;
+}
+
+return {mountQuickPreview, caseCard};
+})();
 __modules["query/interactive-showcase.js"] = (() => {
 // The GIF's original scene, camera and renderer, with the existing orbit controls enabled.
 const {esc} = __modules["util.js"];
 const {createStage, clusterTitle} = __modules["query/stage.js"];
 const {showcaseFrame} = __modules["query/showcase.js"];
-function mountInteractiveShowcase(root, scene, model, layout, {height = 670} = {}) {
+const {caseCard} = __modules["query/quick-preview.js"];
+function mountInteractiveShowcase(root, scene, model, layout, {height = 670, onQuickPreview = null} = {}) {
   root.classList.add("is-showcase", "is-interactive-showcase");
   root.innerHTML = `<canvas class="qg-canvas" data-render-width="1072" data-render-height="${height}" tabindex="0" aria-label="Interactive evidence cloud. Drag to rotate, scroll to zoom, click to inspect. Press Escape to reset."></canvas>
     <div class="cloud-controls"><span>Drag to rotate · Scroll to zoom · Click to inspect</span><button type="button" data-cloud-reset>Reset view</button></div>
+    ${onQuickPreview ? caseCard(scene) : ""}
     <div class="cloud-preview-info" role="status" aria-live="polite" hidden></div>`;
   const canvas = root.querySelector("canvas"), info = root.querySelector(".cloud-preview-info");
+  root.querySelector("[data-quick-preview]")?.addEventListener("click", onQuickPreview);
   const stage = createStage(canvas, scene, model, layout);
   let selected = null;
   const show = item => {
@@ -2137,7 +2584,26 @@ try {
   const scene = __modules['query/model.js'].buildQueryScene(data);
   const model = __modules['query/clusters.js'].buildClusters(scene);
   const layout = __modules['query/layout.js'].layoutClusters(model);
-  const stage = __modules['query/interactive-showcase.js'].mountInteractiveShowcase(root, scene, model, layout, {height:560});
+  // ?mode=tour opens the quick preview; otherwise the hero cloud, whose case card asks the
+  // home page (when framed) to open the quick preview in its dialog, or switches mode itself.
+  const params = new URLSearchParams(location.search);
+  const caseHref = './#/query/' + base.split('/').filter(Boolean).slice(-2).join('/');
+  let stage;
+  if (params.get('mode') === 'tour') {
+    document.documentElement.classList.add('is-tour');
+    stage = __modules['query/quick-preview.js'].mountQuickPreview(root, scene, model, layout, data, {href: caseHref, start: location.hash.slice(1)});
+    root.querySelector('.qp-body').focus({preventScroll: true});
+    // Esc that nothing inside used (no selection to clear) closes the home page's dialog.
+    if (window.parent !== window) document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !e.defaultPrevented) window.parent.postMessage({type: 'prodebugger:close-preview'}, location.origin);
+    });
+  } else {
+    const openTour = () => {
+      if (window.parent !== window) window.parent.postMessage({type: 'prodebugger:quick-preview'}, location.origin);
+      else location.href = '?mode=tour';
+    };
+    stage = __modules['query/interactive-showcase.js'].mountInteractiveShowcase(root, scene, model, layout, {height:560, onQuickPreview: openTour});
+  }
   window.addEventListener('pagehide', () => stage.destroy(), {once:true});
 } catch (error) {
   root.innerHTML = '<img class="cloud-fallback" src="./img/shots/evidence-cloud.gif" alt="Recorded evidence cloud animation"><p class="cloud-fallback-note">Interactive view unavailable · Showing recorded animation</p>';
