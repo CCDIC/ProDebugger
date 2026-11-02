@@ -56,6 +56,10 @@ details.fold > summary .role-tag { flex: none; margin-left: auto; }
 details.fold > summary .badge { flex: none; font-size: .68rem; padding: 0 .4rem; }
 details.fold > .text-box { margin-top: .45rem; }
 .fold-stack { display: flex; flex-direction: column; gap: .35rem; }
+/* All original step text lives in one closed "raw" fold; its fields stay folded inside. */
+details.raw-group { border-style: dashed; }
+details.raw-group > .fold-stack { margin-top: .5rem; }
+details.raw-group .fold-stack > details { margin-top: 0; }
 
 /* 2. The action stays open and reads first. */
 .role-action.is-key .text-box { font-size: 1rem; font-weight: 600; color: var(--text-hi); cursor: auto; }
@@ -237,7 +241,7 @@ These memory steps indicate that I began by checking my inventory and then tried
 <section class="mk-sec" id="opt-b">
   <div class="traj-head"><div><div class="eyebrow">Option B</div><h2>问题单独一栏：Problems 表格，点击展开</h2></div></div>
   <div class="mk-notes">
-    <p>第一栏按阅读顺序放整步内容（Env → Memory / Reflection / Plan → <b>Action</b> → Outcome，只有 Action 展开）；第二栏专放 <b>Problems 表格</b>：每行一条（步号 · 问题名 · 证据原文），violated 红色、can't tell 琥珀色；<b>点击行才展开</b>完整说明、引用卡片和原始记录（规则 ID / reason / fact chips）。第三栏是 TRACE / ROUTE / Facts。</p>
+    <p>第一栏只显示 <b>Action</b>；Env / Memory / Reflection / Plan / Outcome / Agent 原文 / Admissible 全部收进一个默认关闭的 <b>Raw step content</b>，打开后每个字段仍各自折叠（徽章提示里面有几处被引用的原文）；第二栏专放 <b>Problems 表格</b>：每行一条（步号 · 问题名 · 证据原文），violated 红色、can't tell 琥珀色；<b>点击行才展开</b>完整说明、引用卡片和原始记录（规则 ID / reason / fact chips）。第三栏是 TRACE / ROUTE / Facts。</p>
     <p class="mk-pro">一栏读步骤、一栏读问题；表格一眼扫完本步所有问题，细节按需展开，违反再多也不会撑长。</p>
     <p class="mk-con">问题与原文仍分两栏；没有违反的步骤第二栏为空（可隐藏，退回两栏）。</p>
   </div>
@@ -255,7 +259,9 @@ These memory steps indicate that I began by checking my inventory and then tried
       <div class="card-detail step-detail cols-b">
         <div class="detail-col">
           <div class="eyebrow">The step</div>
-          <div class="fold-stack">
+          <div class="detail-block role-action tone-plain is-key has-problem"><h4>Action<span class="badge bad">⚠ Not accepted</span><span class="role-tag">Action</span></h4><div class="text-box"><mark class="hit">'go to drawer 1'</mark></div></div>
+          <details class="detail-block tone-plain fold raw-group"><summary><span class="fold-name">Raw step content</span><span class="fold-prev">Env · Memory · Reflection · Plan · Env → S04 · Agent source · Admissible</span><span class="badge teal">1 cited</span><span class="role-tag">7 fields</span></summary>
+            <div class="fold-stack">
             <details class="detail-block role-state tone-teal fold"><summary><span class="fold-name">Env</span><span class="fold-prev"><mark class="hit env">Nothing happens.</mark></span><span class="badge teal">cited</span><span class="role-tag">State</span></summary><div class="text-box"><mark class="hit env">Nothing happens.</mark></div></details>
             <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Memory</span><span class="fold-prev">These memory steps indicate that I began by checking my inventory…</span><span class="role-tag">Reasoning</span></summary><div class="text-box">Look at the past observations and actions from our conversation history.
 - Step 1: Observation: … Action: 'inventory'
@@ -263,9 +269,11 @@ These memory steps indicate that I began by checking my inventory and then tried
 These memory steps indicate that I began by checking my inventory and then tried to look around for more details, but did not find anything specific about the keychain.</div></details>
             <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Reflection</span><span class="fold-prev">I need to explore the environment to locate the keychain…</span><span class="role-tag">Reasoning</span></summary><div class="text-box">… The last action 'look' resulted in a non-informative response, <mark class="hit env">"Nothing happens,"</mark> indicating no progress was made. …</div></details>
             <details class="detail-block role-reasoning tone-info fold"><summary><span class="fold-name">Plan</span><span class="fold-prev">I expect to either find the keychain or gather clues about its whereabouts.</span><span class="role-tag">Reasoning</span></summary><div class="text-box">… I should navigate to locations where small items like a keychain could be stored, such as drawers, shelves, or sidetables. …</div></details>
-          </div>
-          <div class="detail-block role-action tone-plain is-key has-problem"><h4>Action<span class="badge bad">⚠ Not accepted</span><span class="role-tag">Action</span></h4><div class="text-box"><mark class="hit">'go to drawer 1'</mark></div></div>
-          <details class="detail-block role-outcome tone-teal-2 fold"><summary><span class="fold-name">Env → S04</span><span class="fold-prev">Nothing happens.</span><span class="role-tag">Outcome</span></summary><div class="text-box">Nothing happens.</div></details>
+            <details class="detail-block role-outcome tone-teal-2 fold"><summary><span class="fold-name">Env → S04</span><span class="fold-prev">Nothing happens.</span><span class="role-tag">Outcome</span></summary><div class="text-box">Nothing happens.</div></details>
+            <details class="detail-block fold"><summary><span class="fold-name">Agent · raw source</span></summary><div class="text-box">&lt;memory&gt; … &lt;action&gt;'go to drawer 1'&lt;/action&gt;</div></details>
+            <details class="detail-block fold"><summary><span class="fold-name">Admissible · 27</span><span class="fold-prev">go to armchair 1, go to bed 1, go to drawer 1, …</span></summary><div class="chip-row" style="margin-top:.45rem"><span class="chip mono"><mark class="hit ok">go to drawer 1</mark></span><span class="chip mono">…</span></div></details>
+            </div>
+          </details>
         </div>
         <div class="detail-col">
           <div class="detail-block tone-plain prob-block">
@@ -308,8 +316,6 @@ These memory steps indicate that I began by checking my inventory and then tried
           <div class="eyebrow">Debugger findings</div>
           <div class="detail-block muted">No TRACE candidate or ROUTE anchor at this step.</div>
           <details class="detail-block tone-violet fold"><summary><span class="fold-name">Facts · 7</span><span class="fold-prev">3 cited by the problems</span></summary><div class="chip-col" style="margin-top:.45rem"><button class="fact-chip side-env"><span class="mono fid">f36</span><span class="fact-text">effect(agent:self) = none</span><span class="slot mono">obs</span></button><button class="fact-chip side-env"><span class="mono fid">f42</span><span class="fact-text">admissibility(int:i3) = quoted</span><span class="slot mono">chk</span></button></div></details>
-          <details class="detail-block fold"><summary><span class="fold-name">Agent · raw source</span></summary><div class="text-box">&lt;memory&gt; … &lt;action&gt;'go to drawer 1'&lt;/action&gt;</div></details>
-          <details class="detail-block fold"><summary><span class="fold-name">Admissible · 27</span><span class="fold-prev">go to armchair 1, go to bed 1, go to drawer 1, …</span></summary><div class="chip-row" style="margin-top:.45rem"><span class="chip mono"><mark class="hit ok">go to drawer 1</mark></span><span class="chip mono">…</span></div></details>
         </div>
       </div>
     </article>
