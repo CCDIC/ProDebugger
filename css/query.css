@@ -671,6 +671,14 @@ body.page-query .app { padding: 0; }
 .sd-cellrow { display: grid; grid-template-columns: 6.2rem 1fr; gap: 0 .6rem; padding: .15rem .2rem; }
 .sd-cellrow:hover, .sd-list li:hover, .sd-goal:hover { background: var(--tint-hover); }
 .sd-cellrow p { margin: 0; }
+.sd-modtabs { display: flex; flex-wrap: wrap; gap: .3rem; margin: .1rem 0 .25rem; }
+.sd-modtab { display: inline-flex; align-items: center; gap: .35rem; padding: .12rem .5rem; border: 1px solid var(--qg-line-hi); border-left: 2px solid var(--src, var(--qg-line-hi)); border-radius: 2px; background: none; color: var(--qg-label); font-family: var(--mono); font-size: .74rem; cursor: pointer; }
+.sd-modtab em { font-style: normal; color: var(--qg-label-dim); }
+.sd-modtab:hover { background: var(--tint-hover); color: var(--text-hi); }
+.sd-modtab[aria-expanded="true"] { border-color: var(--src, var(--qg-focus)); background: color-mix(in srgb, var(--src, var(--qg-focus)) 16%, transparent); color: var(--text-hi); }
+.sd-modtab[data-src="env"] { --src: var(--qg-th-env); }
+.sd-modtab[data-src="agent"] { --src: var(--qg-th-agent); }
+.sd-cellrow.is-fold[hidden] { display: none; }
 .sd-calls { grid-column: 2; display: flex; flex-wrap: wrap; gap: .25rem; align-items: center; margin-top: .15rem; }
 .sd-calls code { padding: 0 .3rem; border: 1px solid var(--qg-line); font-family: var(--mono); font-size: .74rem; color: var(--qg-label-dim); }
 .sd-arrow { color: var(--qg-label-dim); font-family: var(--mono); font-size: .78rem; }
