@@ -6,7 +6,7 @@ import {mountHome} from "./pages/home.js?v=231e285696";
 import {mountRuns} from "./pages/runs.js?v=27bf1baa85";
 import {mountChat} from "./pages/chat.js?v=27bf1baa85";
 import {mountWorkbench} from "./pages/workbench.js?v=27bf1baa85";
-import {mountQuery} from "./pages/query.js?v=e6d93658f9";
+import {mountQuery} from "./pages/query.js?v=ad59c1cadf";
 import {initTheme, setThemePage} from "./theme.js?v=27bf1baa85";
 
 const app = document.getElementById("app");

@@ -1,7 +1,7 @@
 // Read-only narrative layer. All claims and evidence stay bound to this run's records.
 // Missing fields stay unavailable; a retrieved record is never promoted to an error.
 import {esc, short} from "../util.js?v=27bf1baa85";
-import {factRepr, SLOT_LABEL, SIGNAL_LABEL} from "./model.js?v=e6d93658f9";
+import {factRepr, SLOT_LABEL, SIGNAL_LABEL} from "./model.js?v=ad59c1cadf";
 
 const PHASES = ["PARSE", "MAP", "ROUTE", "MANAGER", "TRACE", "SUBMIT"];
 const DEST = {PARSE:"To DSL record", MAP:"To task requirements", ROUTE:"To investigation leads", MANAGER:"To investigation branches", TRACE:"To queried evidence", SUBMIT:"To the recorded diagnosis"};

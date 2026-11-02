@@ -2,8 +2,8 @@
 // of agent steps (S1…Sn), from the task's goal down to the root cause. Each row says what the
 // debugger asked, answers it in a sentence, puts its marks on the step axis, and names the tower
 // clouds it stands for; four evidence cards carry the text the axis cannot.
-import {agentWords, cap, faultText, goalText, question, statusText, stepList, suspicion} from "./narrate.js?v=e6d93658f9";
-import {SLOT_LABEL} from "./model.js?v=e6d93658f9";
+import {agentWords, cap, faultText, goalText, question, statusText, stepList, suspicion} from "./narrate.js?v=ad59c1cadf";
+import {SLOT_LABEL} from "./model.js?v=ad59c1cadf";
 
 // Routing signals in three kinds: routine noise, actions that had no effect, and the few
 // that touch the goal itself.

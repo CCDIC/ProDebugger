@@ -2,8 +2,8 @@
 // this case, and behind its "more details" a popup (how it did it) and a rail (what came out).
 // Both name the same entities and steps; pointing at one lights it everywhere, on the tower too.
 import {esc} from "../util.js?v=27bf1baa85";
-import {SIGNAL_LABEL, SLOT_LABEL} from "./model.js?v=e6d93658f9";
-import {agentWords, cap, faultText, goalText, question, statusText, stepList, VERDICT_WORD} from "./narrate.js?v=e6d93658f9";
+import {SIGNAL_LABEL, SLOT_LABEL} from "./model.js?v=ad59c1cadf";
+import {agentWords, cap, faultText, goalText, question, statusText, stepList, VERDICT_WORD} from "./narrate.js?v=ad59c1cadf";
 
 const SLOT_ORDER = ["obs", "mem", "refl", "plan", "act", "chk"];
 // Who wrote a line: the environment, or the agent itself (memory, reflection, plan, action).
@@ -145,9 +145,9 @@ export function buildDetails(scene, model) {
       const cells = SLOT_ORDER.map(slot => [slot, cell(t, slot)]).filter(([, fs]) => fs.length);
       if (!cells.length) continue;
       const tag = t === root?.step ? `<i class="sd-tag is-root">root</i>` : windowSteps.has(t) ? `<i class="sd-tag">suspect window</i>` : "";
-      rows.push(`<li class="sd-step ${key.has(t) ? "is-key" : key.size ? "is-dim" : ""}" data-step="${t}"><h5>${t ? `Step ${t}` : "Task"}${tag}</h5><div class="sd-modtabs">${cells.map(([slot, fs]) => `<button type="button" class="sd-modtab" data-src="${SOURCE[slot]}" data-slot-toggle="${slot}" aria-expanded="false" data-fids="${fids(fs.map(f => f.fid))}">${SLOT_LABEL[slot]}<em>${fs.length}</em></button>`).join("")}</div>${cells.map(([slot, fs]) => {
+      rows.push(`<li class="sd-step sd-card ${key.has(t) ? "is-key" : key.size ? "is-dim" : ""}" data-step="${t}"><h5>${t ? `Step ${t}` : "Task"}${tag}<span class="sd-modtabs">${cells.map(([slot, fs]) => `<button type="button" class="sd-modtab" data-mod="${slot}" data-slot-toggle="${slot}" aria-expanded="false" data-fids="${fids(fs.map(f => f.fid))}">${SLOT_LABEL[slot]}<em>${fs.length}</em></button>`).join("")}</span></h5>${cells.map(([slot, fs]) => {
         const calls = fs.slice(0, 4).map(f => `<code>#${f.fid} ${esc(factCall(f))}</code>`).join("") + (fs.length > 4 ? `<code class="sd-more">+${fs.length - 4}</code>` : "");
-        return `<div class="sd-cellrow is-fold" data-slot="${slot}" data-src="${SOURCE[slot]}" data-fids="${fids(fs.map(f => f.fid))}" hidden><span class="sd-k sd-src">${SLOT_LABEL[slot]}</span><p>${mark(clip(cellText(fs), 260))}</p><div class="sd-calls"><span class="sd-arrow">→</span>${calls}</div></div>`;
+        return `<div class="sd-cellrow is-fold" data-mod="${slot}" data-slot="${slot}" data-src="${SOURCE[slot]}" data-fids="${fids(fs.map(f => f.fid))}" hidden><span class="sd-k sd-src">${SLOT_LABEL[slot]}</span><p>${mark(clip(cellText(fs), 260))}</p><div class="sd-calls"><span class="sd-arrow">→</span>${calls}</div></div>`;
       }).join("")}</li>`);
     }
     const bySlot = SLOT_ORDER.map(s => [s, scene.facts.filter(f => f.slot === s).length]).filter(([, n]) => n);

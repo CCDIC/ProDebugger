@@ -671,13 +671,20 @@ body.page-query .app { padding: 0; }
 .sd-cellrow { display: grid; grid-template-columns: 6.2rem 1fr; gap: 0 .6rem; padding: .15rem .2rem; }
 .sd-cellrow:hover, .sd-list li:hover, .sd-goal:hover { background: var(--tint-hover); }
 .sd-cellrow p { margin: 0; }
-.sd-modtabs { display: flex; flex-wrap: wrap; gap: .3rem; margin: .1rem 0 .25rem; }
-.sd-modtab { display: inline-flex; align-items: center; gap: .35rem; padding: .12rem .5rem; border: 1px solid var(--qg-line-hi); border-left: 2px solid var(--src, var(--qg-line-hi)); border-radius: 2px; background: none; color: var(--qg-label); font-family: var(--mono); font-size: .74rem; cursor: pointer; }
-.sd-modtab em { font-style: normal; color: var(--qg-label-dim); }
-.sd-modtab:hover { background: var(--tint-hover); color: var(--text-hi); }
-.sd-modtab[aria-expanded="true"] { border-color: var(--src, var(--qg-focus)); background: color-mix(in srgb, var(--src, var(--qg-focus)) 16%, transparent); color: var(--text-hi); }
-.sd-modtab[data-src="env"] { --src: var(--qg-th-env); }
-.sd-modtab[data-src="agent"] { --src: var(--qg-th-agent); }
+/* PARSE: each step is its own rounded card; its modules sit after the title as coloured pills. */
+.sd-steps:has(> .sd-card) { display: flex; flex-direction: column; gap: .5rem; }
+.sd-step.sd-card { margin: 0; padding: .55rem .7rem; border: 1px solid var(--qg-line-hi); border-radius: 10px; background: color-mix(in srgb, var(--qg-panel) 92%, white 2%); }
+.sd-step.sd-card.is-key { border: 1px solid var(--qg-focus); border-left: 1px solid var(--qg-focus); background: color-mix(in srgb, var(--qg-focus) 9%, transparent); }
+.sd-step.sd-card h5 { flex-wrap: wrap; margin: 0; row-gap: .35rem; }
+.sd-step.sd-card:has(.sd-cellrow:not([hidden])) h5 { margin-bottom: .45rem; }
+.sd-modtabs { display: inline-flex; flex-wrap: wrap; gap: .35rem; margin-left: .4rem; }
+[data-mod="obs"] { --mod: #4fc3b5; } [data-mod="mem"] { --mod: #e58e7a; } [data-mod="refl"] { --mod: #b48cf0; }
+[data-mod="plan"] { --mod: #6ea8fe; } [data-mod="act"] { --mod: #e8b84f; } [data-mod="chk"] { --mod: #9aa5b1; }
+.sd-modtab { display: inline-flex; align-items: center; gap: .4rem; padding: .18rem .65rem; border: 1px solid color-mix(in srgb, var(--mod) 65%, transparent); border-radius: 6px; background: color-mix(in srgb, var(--mod) 12%, transparent); color: var(--mod); font-family: var(--mono); font-size: .74rem; font-weight: 500; cursor: pointer; transition: background .15s, color .15s; }
+.sd-modtab em { font-style: normal; opacity: .75; }
+.sd-modtab:hover { background: color-mix(in srgb, var(--mod) 24%, transparent); }
+.sd-modtab[aria-expanded="true"] { border-color: var(--mod); background: var(--mod); color: var(--qg-void); }
+.sd-card .sd-cellrow[data-mod] { --src: var(--mod); margin-top: .3rem; padding: .4rem .55rem; border: 1px solid color-mix(in srgb, var(--mod) 40%, transparent); border-left: 3px solid var(--mod); border-radius: 8px; background: color-mix(in srgb, var(--mod) 6%, transparent); }
 .sd-cellrow.is-fold[hidden] { display: none; }
 .sd-calls { grid-column: 2; display: flex; flex-wrap: wrap; gap: .25rem; align-items: center; margin-top: .15rem; }
 .sd-calls code { padding: 0 .3rem; border: 1px solid var(--qg-line); font-family: var(--mono); font-size: .74rem; color: var(--qg-label-dim); }
