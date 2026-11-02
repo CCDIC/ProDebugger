@@ -37,6 +37,9 @@ body { padding: 0 16px 6rem; }
 .mk-lane .st-card.is-open { width: 100%; }
 .mk-lane .card-detail { max-height: none; overflow: visible; }
 .mk-lane .lane-track { width: 100%; }
+.step-detail.cols-b { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, .8fr); }
+.step-detail.cols-c { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+@media (max-width: 1100px) { .step-detail.cols-b, .step-detail.cols-c { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- proposed additions, written in the page's own idiom ---------- */
 /* 1. A folded field: same detail-block and tone, its h4 row becomes the summary and
@@ -94,6 +97,35 @@ mark.hit.ok { background: color-mix(in srgb, var(--ok-line) 28%, transparent); b
 .sum-link:hover { filter: brightness(1.08); }
 .sum-link .step-chip { margin-left: auto; }
 
+/* 7. Problems as a table (option B): one row each, click to open the full record. */
+.prob-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.prob-table th { padding: .2rem .45rem; border-bottom: 1px solid var(--line-strong); font-family: var(--mono); font-size: .64rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: left; }
+.prob-table td { padding: .4rem .45rem; vertical-align: middle; }
+.prob-table code { font-size: .78rem; overflow-wrap: anywhere; }
+.prob + .prob .prob-row td { border-top: 1px dashed var(--tint-line); }
+.prob-row { cursor: pointer; }
+.prob-row td:first-child { box-shadow: inset 3px 0 0 var(--row); white-space: nowrap; }
+.prob.is-bad { --row: var(--bad-line); }
+.prob.is-warn { --row: var(--warn-line); }
+.prob-row:hover, .prob-row:focus-visible { background: var(--tint-hover); }
+.prob.is-bad .prob-row strong { color: var(--bad-ink); }
+.prob.is-warn .prob-row strong { color: var(--warn-ink); }
+.prob-caret { width: 1rem; color: var(--muted); font-size: .7rem; transition: transform .15s; }
+.prob-row[aria-expanded="true"] .prob-caret { transform: rotate(90deg); }
+.prob-row[aria-expanded="true"] { background: color-mix(in srgb, var(--row) 10%, transparent); }
+.prob-detail td { padding: .1rem .6rem .7rem .9rem; box-shadow: inset 3px 0 0 var(--row); background: color-mix(in srgb, var(--row) 6%, transparent); }
+.prob-detail p { margin: .3rem 0; font-size: .84rem; }
+.prob-detail .evi { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin: .35rem 0; }
+.prob-detail .evi blockquote { margin: 0; font-style: normal; font-family: var(--mono); font-size: .8rem; overflow-wrap: anywhere; }
+.prob-detail .evi .eyebrow { display: block; margin-bottom: .1rem; font-size: .6rem; opacity: .75; }
+.prob-detail .evi blockquote, .violation .evi blockquote { border-left-color: var(--bad-line); }
+.prob-detail .evi blockquote.env { border-left-color: var(--teal-line); }
+.prob-detail .evi blockquote.ok { border-left-color: var(--ok-line); }
+.prob-detail .note { font-size: .8rem; opacity: .8; }
+.prob-detail .raw-k { margin: .5rem 0 .1rem; font-size: .62rem; }
+.prob-detail .eval-row { border-top: 0; padding-top: 0; }
+@media (max-width: 1100px) { .prob-detail .evi { grid-template-columns: minmax(0, 1fr); } }
+
 /* Shared: collapsed cards + popover, laid out statically */
 .mk-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.5rem; }
 .mk-row .lane-track { flex-wrap: wrap; width: auto; gap: 1rem 1.6rem; padding-left: .6rem; }
@@ -132,7 +164,7 @@ table.mk-words td:first-child { font-family: var(--mono); font-size: .76rem; col
   <li><b>被规则引用的原文就地高亮</b>：fact 自带原文 <code>span</code>，直接在 Action / Env 文本里标出（红 = 出问题的命令，青 = 环境回复，绿 = 正确写法）；折叠时预览也显示这段原文，并带 “cited” 徽章。</li>
   <li><b>违反用人话写</b>：卡片结构照搬 TRACE candidate（徽章 + 步号 chip + 标题 + 说明 + 引用），规则 ID 和 fact 编号收进 “Rule details”，展开后就是原来那一行 eval-row。</li>
 </ul>
-<nav class="mk-toc"><a class="badge" href="#opt-a">A · 保持原三栏</a><a class="badge" href="#opt-b">B · 问题单独一栏</a><a class="badge warn" href="#opt-c">C · 就地标注（推荐）</a><a class="badge" href="#shared">共用：收起卡片 / 箭头浮层</a><a class="badge" href="#words">规则文案表</a></nav>
+<nav class="mk-toc"><a class="badge" href="#opt-a">A · 保持原三栏</a><a class="badge" href="#opt-b">B · Problems 表格</a><a class="badge warn" href="#opt-c">C · 就地标注（推荐）</a><a class="badge" href="#shared">共用：收起卡片 / 箭头浮层</a><a class="badge" href="#words">规则文案表</a></nav>
 
 <!-- ======================= A ======================= -->
 <section class="mk-sec" id="opt-a">
@@ -203,10 +235,10 @@ These memory steps indicate that I began by checking my inventory and then tried
 
 <!-- ======================= B ======================= -->
 <section class="mk-sec" id="opt-b">
-  <div class="traj-head"><div><div class="eyebrow">Option B</div><h2>问题单独一栏</h2></div></div>
+  <div class="traj-head"><div><div class="eyebrow">Option B</div><h2>问题单独一栏：Problems 表格，点击展开</h2></div></div>
   <div class="mk-notes">
-    <p>第一栏按阅读顺序放整步内容（Env → Memory / Reflection / Plan → <b>Action</b> → Outcome，只有 Action 展开）；第二栏专放 <b>Problems</b>，每条一张 candidate 式卡片；第三栏是 TRACE / ROUTE / Facts。</p>
-    <p class="mk-pro">一栏读步骤、一栏读问题，层次最清楚；问题卡片和 TRACE 卡片同构，用户不用学新样式。</p>
+    <p>第一栏按阅读顺序放整步内容（Env → Memory / Reflection / Plan → <b>Action</b> → Outcome，只有 Action 展开）；第二栏专放 <b>Problems 表格</b>：每行一条（步号 · 问题名 · 证据原文），violated 红色、can't tell 琥珀色；<b>点击行才展开</b>完整说明、引用卡片和原始记录（规则 ID / reason / fact chips）。第三栏是 TRACE / ROUTE / Facts。</p>
+    <p class="mk-pro">一栏读步骤、一栏读问题；表格一眼扫完本步所有问题，细节按需展开，违反再多也不会撑长。</p>
     <p class="mk-con">问题与原文仍分两栏；没有违反的步骤第二栏为空（可隐藏，退回两栏）。</p>
   </div>
   <section class="lane lane-steps mk-lane"><div class="lane-scroll"><div class="lane-track">
@@ -220,7 +252,7 @@ These memory steps indicate that I began by checking my inventory and then tried
         <div class="card-foot"><span class="badge warn">⚠ Not accepted</span><span class="badge warn">⚠ No effect</span><span class="badge">7 facts</span></div>
         <div class="heat"><span style="width:60%"></span></div>
       </div>
-      <div class="card-detail step-detail">
+      <div class="card-detail step-detail cols-b">
         <div class="detail-col">
           <div class="eyebrow">The step</div>
           <div class="fold-stack">
@@ -236,27 +268,41 @@ These memory steps indicate that I began by checking my inventory and then tried
           <details class="detail-block role-outcome tone-teal-2 fold"><summary><span class="fold-name">Env → S04</span><span class="fold-prev">Nothing happens.</span><span class="role-tag">Outcome</span></summary><div class="text-box">Nothing happens.</div></details>
         </div>
         <div class="detail-col">
-          <div class="eyebrow">Problems · 2</div>
-          <div class="detail-block candidate tone-bad violation">
-            <h4><span class="chip-row"><span class="badge bad">violated</span><button class="step-chip">S03</button><strong>Command not accepted</strong></span></h4>
-            <p>The agent wrapped its command in quotes, so it matches none of the 27 commands the environment accepts.</p>
-            <div class="evi">
-              <blockquote><span class="eyebrow">agent sent · S03</span><mark class="hit">'go to drawer 1'</mark></blockquote>
-              <blockquote class="ok"><span class="eyebrow">accepted form</span><mark class="hit ok">go to drawer 1</mark></blockquote>
-            </div>
-            <details><summary>Rule details</summary><div class="eval-row"><span class="badge bad">violated</span><span class="mono">decision.applicability/v1</span><span class="muted">explicit_contract_mismatch</span><button class="mono link">f41</button><button class="mono link">f42</button></div></details>
+          <div class="detail-block tone-plain prob-block">
+            <h4>Problems<span class="chip-row"><span class="badge bad">violated 2</span><span class="badge warn">can't tell 1</span></span></h4>
+            <table class="prob-table">
+              <thead><tr><th>Step</th><th>Problem</th><th>Evidence</th><th></th></tr></thead>
+              <tbody class="prob is-bad">
+                <tr class="prob-row" tabindex="0" aria-expanded="false"><td><span class="step-chip">S03</span></td><td><strong>Command not accepted</strong></td><td><code><mark class="hit">'go to drawer 1'</mark></code></td><td class="prob-caret">▸</td></tr>
+                <tr class="prob-detail" hidden><td colspan="4">
+                  <p>The agent wrapped its command in quotes, so it matches none of the 27 commands the environment accepts.</p>
+                  <div class="evi"><blockquote><span class="eyebrow">agent sent · S03</span><mark class="hit">'go to drawer 1'</mark></blockquote><blockquote class="ok"><span class="eyebrow">accepted form</span><mark class="hit ok">go to drawer 1</mark></blockquote></div>
+                  <div class="eyebrow raw-k">original record</div>
+                  <div class="eval-row"><span class="badge bad">violated</span><span class="mono">decision.applicability/v1</span><span class="muted">explicit_contract_mismatch</span></div>
+                  <div class="chip-col"><button class="fact-chip side-mind"><span class="mono fid">f41</span><span class="fact-text">go(drawer:1) = go to drawer 1</span><span class="slot mono">act</span></button><button class="fact-chip side-env"><span class="mono fid">f42</span><span class="fact-text">admissibility(int:i3) = quoted</span><span class="slot mono">chk</span></button></div>
+                </td></tr>
+              </tbody>
+              <tbody class="prob is-bad">
+                <tr class="prob-row" tabindex="0" aria-expanded="false"><td><span class="step-chip">S02</span>→<span class="step-chip">S03</span></td><td><strong>Action had no effect</strong></td><td><code>'look'</code> → <mark class="hit env">Nothing happens.</mark></td><td class="prob-caret">▸</td></tr>
+                <tr class="prob-detail" hidden><td colspan="4">
+                  <p>The previous command changed nothing: the environment answered with a no-op. <span class="note">This records what happened, not whose fault it is.</span></p>
+                  <div class="evi"><blockquote><span class="eyebrow">agent sent · S02</span>'look'</blockquote><blockquote class="env"><span class="eyebrow">environment replied · S03</span><mark class="hit env">Nothing happens.</mark></blockquote></div>
+                  <div class="eyebrow raw-k">original record</div>
+                  <div class="eval-row"><span class="badge bad">violated</span><span class="mono">execution.result/v1</span><span class="muted">explicit_no_effect_not_responsibility_judgment</span></div>
+                  <div class="chip-col"><button class="fact-chip side-mind"><span class="mono fid">f34</span><span class="fact-text">look(agent:self) = look</span><span class="slot mono">act</span></button><button class="fact-chip side-env"><span class="mono fid">f36</span><span class="fact-text">effect(agent:self) = none</span><span class="slot mono">obs</span></button></div>
+                </td></tr>
+              </tbody>
+              <tbody class="prob is-warn">
+                <tr class="prob-row" tabindex="0" aria-expanded="false"><td><span class="step-chip">S03</span></td><td><strong>Made progress? Can't tell</strong></td><td class="muted">action differs from S02</td><td class="prob-caret">▸</td></tr>
+                <tr class="prob-detail" hidden><td colspan="4">
+                  <p>The action differs from the previous one, so “repeating without progress” can't be compared.</p>
+                  <div class="eyebrow raw-k">original record</div>
+                  <div class="eval-row"><span class="badge warn">unknown</span><span class="mono">progress.efficiency/v1</span><span class="muted">non_equivalent_action</span></div>
+                  <div class="chip-col"><button class="fact-chip side-mind"><span class="mono fid">f34</span><span class="fact-text">look(agent:self) = look</span><span class="slot mono">act</span></button></div>
+                </td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="detail-block candidate tone-bad violation">
-            <h4><span class="chip-row"><span class="badge bad">violated</span><button class="step-chip">S02</button>→<button class="step-chip">S03</button><strong>Action had no effect</strong></span></h4>
-            <p>The previous command changed nothing: the environment answered with a no-op.</p>
-            <div class="evi">
-              <blockquote><span class="eyebrow">agent sent · S02</span>'look'</blockquote>
-              <blockquote class="env"><span class="eyebrow">environment replied · S03</span><mark class="hit env">Nothing happens.</mark></blockquote>
-            </div>
-            <p class="note">This records what happened, not whose fault it is.</p>
-            <details><summary>Rule details</summary><div class="eval-row"><span class="badge bad">violated</span><span class="mono">execution.result/v1</span><span class="muted">explicit_no_effect_not_responsibility_judgment</span><button class="mono link">f34</button><button class="mono link">f36</button></div></details>
-          </div>
-          <details class="detail-block tone-warn fold"><summary><span class="fold-name">1 check undecided</span><span class="fold-prev">Did this step move the task forward?</span></summary><div class="eval-row"><span class="badge warn">can't tell</span><span>The action differs from the previous one, so repetition can't be compared.</span></div></details>
         </div>
         <div class="detail-col">
           <div class="eyebrow">Debugger findings</div>
@@ -289,7 +335,7 @@ These memory steps indicate that I began by checking my inventory and then tried
         <div class="card-foot"><span class="badge warn">⚠ Not accepted</span><span class="badge warn">⚠ No effect</span><span class="badge">7 facts</span></div>
         <div class="heat"><span style="width:60%"></span></div>
       </div>
-      <div class="card-detail step-detail" style="grid-template-columns: minmax(0, 2fr) minmax(0, 1fr)">
+      <div class="card-detail step-detail cols-c">
         <div class="detail-col">
           <details class="detail-block role-state tone-teal fold"><summary><span class="fold-name">Env</span><span class="fold-prev"><mark class="hit env">Nothing happens.</mark></span><span class="badge teal">cited</span><span class="role-tag">State</span></summary><div class="text-box"><mark class="hit env">Nothing happens.</mark></div></details>
           <div class="detail-block candidate tone-bad violation attached" id="c-v2">
@@ -402,6 +448,11 @@ These memory steps indicate that I began by checking my inventory and then tried
     el.scrollIntoView({behavior: "smooth", block: "center"});
     el.animate([{boxShadow: "0 0 0 3px var(--bad-line)"}, {boxShadow: "0 0 0 0 transparent"}], {duration: 900});
   }));
+  document.querySelectorAll(".prob-row").forEach(r => {
+    const toggle = () => { const open = r.getAttribute("aria-expanded") !== "true"; r.setAttribute("aria-expanded", open); r.nextElementSibling.hidden = !open; };
+    r.addEventListener("click", toggle);
+    r.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+  });
 </script>
 </body>
 </html>
